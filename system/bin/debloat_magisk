@@ -1,0 +1,138 @@
+#!/system/bin/sh
+# Terminal Debloater (Magisk)
+# by veez21 @ xda-developers
+
+# Default Variables
+div="=============================="
+MODDIR=/magisk/terminal_debloater
+prop=$MODDIR/system.prop
+
+# Functions
+get_file_prop() {
+_prop=$2
+_prop=$(grep "$1=" $_prop)
+val=${_prop#*=}
+echo $val
+unset _prop
+}
+
+set_file_prop() {
+_prop=$3
+sed -i "s/${1}=.*/${1}=${2}/g" $_prop
+unset _prop
+}
+
+mktouch() { 
+  mkdir -p ${1%/*}
+  if [ -z "$2" ]; then
+    touch $1
+  else
+    echo $2 > $1
+  fi
+  chmod 644 $1
+}
+
+# Extra Variables
+VER=$(get_file_prop version $MODDIR/module.prop)
+REL=$(get_file_prop versionCode $MODDIR/module.prop)
+
+# Main
+clear
+
+list_system_app() {
+c=1
+x=1
+for i in $(ls /system/app); do
+	app[$x]=/system/app/$i
+	name[$x]=${i%/*}
+	echo "$c - ${name[$x]}"
+	c=$((c+1));x=$((x+1))
+done
+}
+
+list_system_priv-app() {
+c=1
+x=1
+for i in $(ls /system/priv-app); do
+	privapp[$x]=/system/priv-app/$i
+	name[$x]=${i%/*}
+	echo "$c - ${name[$x]}"
+	c=$((c+1));x=$((x+1))
+done
+}
+
+echo "$div"
+echo "Terminal Debloater $VER(${REL})"
+echo "$div"
+echo ""
+echo "$div"
+if [ -d /system/app ]; then
+	echo " 1 - System Apps"
+fi
+if [ -d /system/priv-app ]; then
+	echo " 2 - System Priv-Apps"
+fi
+echo " 0 - Exit"
+echo "$div"
+echo ""
+echo -n "[CHOICE]: "
+read choice
+if [ "$choice" == "1" ]; then
+	if [ -d /system/app ]; then
+		echo "$div"
+		echo "System Apps"
+		echo "$div"
+		echo ""
+		list_system_app
+		echo " 0 - Exit"
+		echo "$div"
+		echo -n "[CHOICE]: "
+		read app
+		if [ "$app" -gt ${#app[@]} ] || [ "$app" -lt 0 ] || [ "$app" == "" ] || [ -n "$(echo $app | tr -d '0-9')" ] ; then
+			echo "Invalid"
+			exit 1
+		elif [ "$app" == "0" ]; then
+			exit
+		else
+			echo "Uninstalling ${name[$((app))]}"
+			sleep 1
+			mktouch $MODDIR${app[$(($app))]}/.replace
+			echo "Reboot to apply changes"
+			exit
+		fi
+	else
+		echo Invalid
+		exit 1
+	fi
+elif [ "$choice" == 2 ]; then
+	if [ -d /system/priv-app ]; then
+	echo "$div"
+	echo "System Priv-Apps"
+	echo "$div"
+	echo ""
+	list_system_priv-app
+	echo " 0 - Exit"
+	echo "$div"
+	echo -n "[CHOICE]: "
+	read privapp
+	if [ "$privapp" -gt ${#privapp[@]} ] || [ "$privapp" -lt 0 ] || [ "$privapp" == "" ] || [ -n "$(echo $privapp | tr -d '0-9')" ] ; then
+		echo "Invalid"
+		exit 1
+	elif [ "$privapp" == "0" ]; then
+		exit
+	else
+		echo "Uninstalling ${name[$((privapp))]}"
+		sleep 1
+		mktouch $MODDIR${privapp[$((privapp))]}/.replace
+		echo "Reboot to apply changes"
+		exit
+	fi
+	else
+	echo Invalid
+	exit 1
+	fi
+	
+elif [ "$app" == "0" ]; then
+	exit 
+else echo Invalid
+fi
