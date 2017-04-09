@@ -6,5 +6,5 @@ Just enter this command in Terminal Emulator:
 
 	debloat_magisk
 	
-And you will be presented with a list of app names (not accurate, depending on folder name) inside /system.
+And you will be presented with a list of app names (might be not accurate, depending on folder name) inside /system.
 Just reboot and you will have it removed, systemless-ly :D
