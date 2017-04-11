@@ -101,3 +101,21 @@ set_permissions() {
   # set_perm  $MODPATH/system/lib/libart.so       0       0       0644
   set_perm $MODPATH/system/bin/debloat_magisk 0 0 0777
 }
+
+detect_unin() {
+  if [ -d /magisk/$MODID ]; then
+    c=1
+    for i in $(find /magisk/$MODID -name '.replace'); do
+	  export unin_app_$c=$i
+      c=$((c+1))
+	done
+  fi
+}
+
+reuninstall() {
+  for i in $(set | grep 'unin_app_'); do
+    app=${i#*=}
+    app=$(echo $app | tr -d "'")
+    mktouch $app
+  done
+}

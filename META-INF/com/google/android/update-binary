@@ -256,6 +256,9 @@ if ! is_mounted $MOUNTPATH; then
   exit 1
 fi
 
+# CUSTOM - Detect Uninstalled Apps
+detect_unin 
+
 # Create mod paths
 rm -rf $MODPATH 2>/dev/null
 mkdir -p $MODPATH
@@ -296,6 +299,9 @@ fi
 if $LATESTARTSERVICE; then
   cp -af $INSTALLER/common/service.sh $MODPATH/service.sh
 fi
+
+# CUSTOM - Re-uninstall apps
+reuninstall
 
 ui_print "- Setting permissions"
 set_permissions

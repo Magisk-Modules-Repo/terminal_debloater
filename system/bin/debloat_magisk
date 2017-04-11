@@ -6,20 +6,29 @@
 div="==========================="
 MODDIR=/magisk/terminal_debloater
 prop=$MODDIR/system.prop
+G='\e[01;32m'    # GREEN
+R='\e[01;31m'    # RED
+Y='\e[01;33m'    # YELLOW
+B='\e[01;34m'    # BLUE
+V='\e[01;35m'    # VIOLET
+Bl='\e[01;30m'   # BLACK
+C='\e[01;36m'    # CYAN
+W='\e[01;37m'    # WHITE
+N='\e[00;37;40m' #
 
 #=========================== Functions
 get_file_prop() {
-_prop=$2
-_prop=$(grep "$1=" $_prop)
-val=${_prop#*=}
-echo $val
-unset _prop
+  _prop=$2
+  _prop=$(grep "$1=" $_prop)
+  val=${_prop#*=}
+  echo $val
+  unset _prop
 }
 
 set_file_prop() {
-_prop=$3
-sed -i "s/${1}=.*/${1}=${2}/g" $_prop
-unset _prop
+  _prop=$3
+  sed -i "s/${1}=.*/${1}=${2}/g" $_prop
+  unset _prop
 }
 
 mktouch() { 
@@ -42,269 +51,269 @@ clear
 show_rein=0
 
 get_app_name() {
-if [ -x /system/bin/aapt ]; then
-	app_name=$(aapt dump badging $1/${name[$2]}.apk | grep 'application-label:' 2>/dev/null)
-	if [ $? -gt 0 ]; then
-		app_name[$2]=${name[$2]}
-		return
-	fi
-	app_name=${app_name#*:}
-	app_name[$2]=$(echo $app_name | tr ' ' '_' | tr -d "'")
-else
-	app_name[$2]=${name[$2]}
-fi
+  if [ -x /system/bin/aapt ]; then
+    app_name=$(aapt dump badging $1/${name[$2]}.apk | grep 'application-label:' 2>/dev/null)
+    if [ $? -gt 0 ]; then
+      app_name[$2]=${name[$2]}
+      return
+    fi
+    app_name=${app_name#*:}
+    app_name[$2]=$(echo $app_name | tr ' ' '_' | tr -d "'")
+  else
+    app_name[$2]=${name[$2]}
+  fi
 }
 
 list_system_app() {
-c=1
-x=1
-for i in $(ls /system/app); do
-	app[$x]=/system/app/$i
-	if [ ! -d $MODDIR${app[$x]} ]; then
-		name[$x]=${i%/*}
-		get_app_name ${app[$x]} $x
-		c=$((c+1));x=$((x+1))
-	fi
-done
+  c=1
+  x=1
+  for i in $(ls /system/app); do
+    app[$x]=/system/app/$i
+    if [ ! -d $MODDIR${app[$x]} ]; then
+      name[$x]=${i%/*}
+      get_app_name ${app[$x]} $x
+      c=$((c+1));x=$((x+1))
+    fi
+  done
 }
 
 list_system_priv-app() {
-c=1
-x=1
-for i in $(ls /system/priv-app); do
-	privapp[$x]=/system/priv-app/$i
-	if [ ! -d $MODDIR${privapp[$x]} ]; then
-		name[$x]=${i%/*}
-		get_app_name ${privapp[$x]} $x
-		c=$((c+1));x=$((x+1))
-	fi
-done
+  c=1
+  x=1
+  for i in $(ls /system/priv-app); do
+    privapp[$x]=/system/priv-app/$i
+    if [ ! -d $MODDIR${privapp[$x]} ]; then
+      name[$x]=${i%/*}
+      get_app_name ${privapp[$x]} $x
+      c=$((c+1));x=$((x+1))
+    fi
+  done
 }
 
 list_unin_app() {
-c=1
-if [ -d /system/app ] && [ -d $MODDIR/system/app ]; then
-	for i in $(ls $MODDIR/system/app); do
-		unin_app[$c]=$MODDIR/system/app/$i
-		name_unin[$c]=$(cat $MODDIR/system/app/$i/.replace)
-		if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR/system/app/$i/.replace) ]]; then
-			name_unin[$c]=$i
-		fi
-		echo " $c - ${name_unin[$c]}" | tr '_' ' '
-		c=$((c+1))
-	done
-fi
-if [ -d /system/priv-app ] && [ -d $MODDIR/system/priv-app ]; then
-	for i in $(ls $MODDIR/system/priv-app); do
-		unin_app[$c]=$MODDIR/system/priv-app/$i
-		name_unin[$c]=$(cat $MODDIR/system/priv-app/$i/.replace)
-		if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR/system/priv-app/$i/.replace) ]]; then
-			name_unin[$c]=$i
-		fi
-		echo " $c - ${name_unin[$c]}" | tr '_' ' '
-		c=$((c+1))
-	done
-fi
+  c=1
+  if [ -d /system/app ] && [ -d $MODDIR/system/app ]; then
+    for i in $(ls $MODDIR/system/app); do
+      unin_app[$c]=$MODDIR/system/app/$i
+      name_unin[$c]=$(cat $MODDIR/system/app/$i/.replace)
+      if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR/system/app/$i/.replace) ]]; then
+        name_unin[$c]=$i
+      fi
+      echo " $c - ${W}${name_unin[$c]}${N}" | tr '_' ' '
+      c=$((c+1))
+    done
+  fi
+  if [ -d /system/priv-app ] && [ -d $MODDIR/system/priv-app ]; then
+    for i in $(ls $MODDIR/system/priv-app); do
+      unin_app[$c]=$MODDIR/system/priv-app/$i
+      name_unin[$c]=$(cat $MODDIR/system/priv-app/$i/.replace)
+      if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR/system/priv-app/$i/.replace) ]]; then
+        name_unin[$c]=$i
+      fi
+      echo " $c - ${W}${name_unin[$c]}${N}" | tr '_' ' '
+      c=$((c+1))
+    done
+  fi
 }
 
 if [ -d $MODDIR/system/app ]; then
-	for i in $MODDIR/system/app/*; do
-		if [ -f $i/.replace ]; then
-			show_rein=1
-			break
-		fi
-	done
+  for i in $MODDIR/system/app/*; do
+    if [ -f $i/.replace ]; then
+      show_rein=1
+      break
+    fi
+  done
 elif [ -d $MODDIR/system/priv-app ]; then
-	for i in $MODDIR/system/priv-app/*; do
-		if [ -f $i/.replace ]; then
-			show_rein=1
-			break
-		fi
-	done
+  for i in $MODDIR/system/priv-app/*; do
+    if [ -f $i/.replace ]; then
+      show_rein=1
+      break
+    fi
+  done
 fi
 
 echo "$div"
-echo "Terminal Debloater $VER(${REL})"
+echo "${R}Terminal Debloater${N} ${W}$VER${N}(${Bl}${REL}${N})"
 echo "by veez21 @ xda-developers"
 echo "$div"
 echo ""
 if [ -d /system/app ]; then
-	echo " 1 - System Apps"
+  echo " 1 - ${W}System Apps${N}"
 fi
 if [ -d /system/priv-app ]; then
-	echo " 2 - System Priv-Apps"
+  echo " 2 - ${W}System Priv-Apps${N}"
 fi
 if [ $show_rein == 1 ]; then
-	echo " 3 - Reinstall Uninstalled Apps"
+  echo " 3 - ${W}Reinstall Uninstalled Apps${N}"
 fi
-echo " 0 - Exit"
+echo " 0 - ${Bl}Exit${N}"
 echo ""
 echo -n "[CHOICE]: "
 read choice
 if [ "$choice" == "1" ]; then
-	if [ -d /system/app ]; then
-		clear
-		echo "$div"
-		echo "System Apps"
-		echo "$div"
-		echo ""
-		echo Loading Apps...
-		list_system_app 2>/dev/null
-		c=1
-		for i in $(seq 1 $((${#app_name[@]}-1))); do
-			echo " $c - ${app_name[$i]}" | tr '_' ' '
-			c=$((c+1))
-		done
-		echo ""
-		echo " m - Uninstall Multiple"
-		echo " 0 - Exit"
-		echo "$div"
-		echo -n "[CHOICE]: "
-		read app
-		if [ "$app" == m ]; then
-			echo "Choose numbers listed above."
-			echo "Do not repeat the same number."
-			echo " 0 - Proceed to Uninstall choices"
-			echo -n " > "
-			c=1
-			while read app; do
-				if [ "$app" == 0 ]; then
-					break
-				fi
-				echo "Add to Queue: ${app_name[$app]}" | tr '_' ' '
-				multiple[$c]=$MODDIR${app[$app]}
-				choice[$c]=$app
-				c=$((c+1))
-				busybox printf " > "
-			done
-			if [ "${#multiple[@]}" == 0 ]; then
-				echo "No app chosen"
-				exit 1
-			else
-				c=1
-				for i in ${multiple[@]}; do
-					echo "Uninstalling ${app_name[${choice[$c]}]}" | tr '_' ' '
-					mktouch $i/.replace ${app_name[${choice[$c]}]}
-					sleep 0.5
-					c=$((c+1))
-				done
-				exit
-			fi
-		elif [ "$app" -gt ${#app[@]} ] || [ "$app" -lt 0 ] || [ "$app" == "" ] || [ -n "$(echo $app | tr -d '0-9')" ] ; then
-			echo "Invalid"
-			exit 1
-		elif [ "$app" == "0" ]; then
-			exit
-		else
-			echo "Uninstalling ${app_name[$app]}" | tr '_' ' '
-			sleep 1
-			mktouch $MODDIR${app[$app]}/.replace ${app_name[$app]}
-			echo "Reboot to apply changes"
-			exit
-		fi
-	else
-		echo Invalid
-		exit 1
+  if [ -d /system/app ]; then
+    clear
+    echo "$div"
+    echo "${R}System Apps${N}"
+    echo "$div"
+    echo ""
+    echo "${G}Loading Apps...${N}"
+    list_system_app 2>/dev/null
+    c=1
+    for i in $(seq 1 $((${#app_name[@]}-1))); do
+      echo " $c - ${W}${app_name[$i]}${N}" | tr '_' ' '
+      c=$((c+1))
+    done
+    echo ""
+    echo " m - ${G}Uninstall Multiple${N}"
+    echo " 0 - ${Bl}Exit${N}"
+    echo "$div"
+    echo -n "[CHOICE]: "
+    read app
+    if [ "$app" == m ]; then
+      echo "Choose numbers listed above."
+      echo "Do not repeat the same number."
+      echo " 0 - Proceed to Uninstall choices"
+      echo -n " > "
+      c=1
+      while read app; do
+        if [ "$app" == 0 ]; then
+          break
+        fi
+        echo "Add to Queue: ${R}${app_name[$app]}${N}" | tr '_' ' '
+        multiple[$c]=$MODDIR${app[$app]}
+        choice[$c]=$app
+        c=$((c+1))
+        busybox printf " > "
+      done
+      if [ "${#multiple[@]}" == 0 ]; then
+        echo "No app chosen"
+        exit 1
+      else
+        c=1
+        for i in ${multiple[@]}; do
+          echo "Uninstalling ${R}${app_name[${choice[$c]}]}${N}" | tr '_' ' '
+          mktouch $i/.replace ${app_name[${choice[$c]}]}
+          sleep 0.5
+          c=$((c+1))
+        done
+        exit
+      fi
+    elif [ "$app" -gt ${#app[@]} ] || [ "$app" -lt 0 ] || [ "$app" == "" ] || [ -n "$(echo $app | tr -d '0-9')" ] ; then
+      echo "Invalid"
+      exit 1
+    elif [ "$app" == "0" ]; then
+      exit
+    else
+      echo "Uninstalling ${R}${app_name[$app]}${N}" | tr '_' ' '
+      sleep 1
+      mktouch $MODDIR${app[$app]}/.replace ${app_name[$app]}
+      echo "Reboot to apply changes"
+      exit
+    fi
+  else
+    echo Invalid
+    exit 1
 	fi
 elif [ "$choice" == 2 ]; then
-	if [ -d /system/priv-app ]; then
-		clear
-		echo "$div"
-		echo "System Priv-Apps"
-		echo "$div"
-		echo ""
-		echo Loading Apps...
-		list_system_priv-app 2>/dev/null
-		c=1
-		for i in $(seq 1 $((${#app_name[@]}-1))); do
-			echo " $c - ${app_name[$i]}" | tr '_' ' '
-			c=$((c+1))
-		done
-		echo ""
-		echo " m - Uninstall Multiple"
-		echo " 0 - Exit"
-		echo "$div"
-		echo -n "[CHOICE]: "
-		read privapp
-		if [ "$privapp" == m ]; then
-			echo "Choose numbers listed above."
-			echo "Do not repeat the same number."
-			echo " 0 - Proceed to Uninstall choices"
-			echo -n " > "
-			c=1
-			while read app; do
-				if [ "$app" == 0 ]; then
-					break
-				fi
-				echo "Add to Queue: ${app_name[$app]}" | tr '_' ' '
-				multiple[$c]=$MODDIR${privapp[$app]}
-				choice[$c]=$app
-				c=$((c+1))
-				busybox printf " > "
-			done
-			if [ "${#multiple[@]}" == 0 ]; then
-				echo "No app chosen"
-				exit 1
-			else
-				c=1
-				for i in ${multiple[@]}; do
-					echo "Uninstalling ${app_name[${choice[$c]}]}" | tr '_' ' '
-					mktouch $i/.replace ${app_name[${choice[$c]}]}
-					sleep 0.5
-					c=$((c+1))
-				done
-				exit
-			fi
-		elif [ "$privapp" -gt ${#privapp[@]} ] || [ "$privapp" -lt 0 ] || [ "$privapp" == "" ] || [ -n "$(echo $privapp | tr -d '0-9')" ] ; then
-			echo "Invalid"
-			exit 1
-		elif [ "$privapp" == "0" ]; then
-			exit
-		else
-			echo "Uninstalling ${app_name[$privapp]}" | tr '_' ' ' 
-			sleep 1
-			mktouch $MODDIR${privapp[$privapp]}/.replace ${app_name[$privapp]}
-			echo "Reboot to apply changes"
-			exit
-		fi
-	else
-		echo Invalid
-		exit 1
-	fi
+  if [ -d /system/priv-app ]; then
+    clear
+    echo "$div"
+    echo "${R}System Priv-Apps${N}"
+    echo "$div"
+    echo ""
+    echo "${G}Loading Apps...${N}"
+    list_system_priv-app 2>/dev/null
+    c=1
+    for i in $(seq 1 $((${#app_name[@]}-1))); do
+      echo " $c - ${W}${app_name[$i]}${N}" | tr '_' ' '
+      c=$((c+1))
+    done
+    echo ""
+    echo " m - ${G}Uninstall Multiple${N}"
+    echo " 0 - ${Bl}Exit${N}"
+    echo "$div"
+    echo -n "[CHOICE]: "
+    read privapp
+    if [ "$privapp" == m ]; then
+      echo "Choose numbers listed above."
+      echo "Do not repeat the same number."
+      echo " 0 - Proceed to Uninstall choices"
+      echo -n " > "
+      c=1
+      while read app; do
+        if [ "$app" == 0 ]; then
+          break
+        fi
+        echo "Add to Queue: ${R}${app_name[$app]}${N}" | tr '_' ' '
+        multiple[$c]=$MODDIR${privapp[$app]}
+        choice[$c]=$app
+        c=$((c+1))
+        busybox printf " > "
+      done
+      if [ "${#multiple[@]}" == 0 ]; then
+        echo "No app chosen"
+        exit 1
+      else
+        c=1
+        for i in ${multiple[@]}; do
+          echo "Uninstalling ${R}${app_name[${choice[$c]}]}${N}" | tr '_' ' '
+          mktouch $i/.replace ${app_name[${choice[$c]}]}
+          sleep 0.5
+          c=$((c+1))
+        done
+        exit
+      fi
+    elif [ "$privapp" -gt ${#privapp[@]} ] || [ "$privapp" -lt 0 ] || [ "$privapp" == "" ] || [ -n "$(echo $privapp | tr -d '0-9')" ] ; then
+      echo "Invalid"
+      exit 1
+    elif [ "$privapp" == "0" ]; then
+      exit
+    else
+      echo "Uninstalling ${R}${app_name[$privapp]}${N}" | tr '_' ' ' 
+      sleep 1
+      mktouch $MODDIR${privapp[$privapp]}/.replace ${app_name[$privapp]}
+      echo "Reboot to apply changes"
+      exit
+    fi
+  else
+    echo Invalid
+    exit 1
+  fi
 elif [ "$choice" == 3 ]; then
-	if [ $show_rein == 1 ]; then
-		clear
-		echo "$div"
-		echo "Reinstall"
-		echo "$div"
-		echo ""
-		list_unin_app
-		echo " 0 - Exit"
-		echo ""
-		echo -n "[CHOICE]: "
-		read rein
-		if [ "$rein" -gt ${#name_unin[@]} ] || [ "$rein" -lt 0 ] || [ "$rein" == "" ] || [ -n "$(echo $rein | tr -d '0-9')" ] ; then
-			echo "Invalid"
-			exit 1
-		elif [ "$rein" == "0" ]; then
-			exit
-		else
-			echo "Reinstalling ${name_unin[$rein]}" | tr '_' ' '
-			sleep 1
-			rm -rf ${unin_app[$rein]}
-			echo "Reboot to apply changes"
-			exit
-		fi
-	else
-		echo "Invalid"
-		exit 1
-	fi
+  if [ $show_rein == 1 ]; then
+    clear
+    echo "$div"
+    echo "${R}Reinstall${N}"
+    echo "$div"
+    echo ""
+    list_unin_app
+    echo " 0 - ${Bl}Exit${N}"
+    echo ""
+    echo -n "[CHOICE]: "
+    read rein
+    if [ "$rein" -gt ${#name_unin[@]} ] || [ "$rein" -lt 0 ] || [ "$rein" == "" ] || [ -n "$(echo $rein | tr -d '0-9')" ] ; then
+      echo "Invalid"
+      exit 1
+    elif [ "$rein" == "0" ]; then
+      exit
+    else
+      echo "Reinstalling ${G}${name_unin[$rein]}${N}" | tr '_' ' '
+      sleep 1
+      rm -rf ${unin_app[$rein]}
+      echo "Reboot to apply changes"
+      exit
+    fi
+  else
+    echo "Invalid"
+    exit 1
+  fi
 
 #======================================================================
 elif [ "$app" == "0" ]; then
-	exit 
+  exit 
 else echo Invalid
-	exit 1
+  exit 1
 fi
 
 exit $?
