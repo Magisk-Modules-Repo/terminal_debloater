@@ -1,22 +1,22 @@
 #!/system/bin/sh
-# Terminal Debloater (Magisk)
+# Terminal Magisk Mod Template
 # by veez21 @ xda-developers
 
-# Default Variables
-div="==========================="
-MODDIR=/magisk/terminal_debloater
-prop=$MODDIR/system.prop
-G='\e[01;32m'    # GREEN
-R='\e[01;31m'    # RED
-Y='\e[01;33m'    # YELLOW
-B='\e[01;34m'    # BLUE
-V='\e[01;35m'    # VIOLET
-Bl='\e[01;30m'   # BLACK
-C='\e[01;36m'    # CYAN
-W='\e[01;37m'    # WHITE
-N='\e[00;37;40m' #
 
-#=========================== Functions
+# Magisk Module ID **
+# > ENTER MAGISK MODULE ID HERE
+ID="terminal_debloater"
+
+#=========================== Set Busybox (Used by Magisk) up
+# > Do not touch!
+alias busybox=/data/magisk/busybox
+for i in $(busybox --list); do
+	if [ $i != 'echo' ]; then
+		alias $i="/data/magisk/busybox $i"
+	fi
+done
+
+#=========================== Default Functions
 get_file_prop() {
   _prop=$2
   _prop=$(grep "$1=" $_prop)
@@ -26,9 +26,7 @@ get_file_prop() {
 }
 
 set_file_prop() {
-  _prop=$3
-  sed -i "s/${1}=.*/${1}=${2}/g" $_prop
-  unset _prop
+  sed -i "s/${1}=.*/${1}=${2}/g" $3
 }
 
 mktouch() { 
@@ -41,14 +39,38 @@ mktouch() {
   chmod 644 $1
 }
 
-#=========================== Extra Variables
+#=========================== Default Variables
+# > Stuff here is used for some other stuff
+# > Edit only if necessary!
+MODDIR="/magisk/$ID"
 VER=$(get_file_prop version $MODDIR/module.prop)
 REL=$(get_file_prop versionCode $MODDIR/module.prop)
+AUTHOR=$(get_file_prop author $MODDIR/module.prop)
+MODTITLE=$(get_file_prop name $MODDIR/module.prop)
+div="${Bl}$(printf '%*s' "$(($(echo $MODTITLE | wc -c)+$(echo $VER | wc -c)+$(echo $REL | wc -c)))" '' | tr ' ' =)${N}"
+G='\e[01;32m'    # GREEN
+R='\e[01;31m'    # RED
+Y='\e[01;33m'    # YELLOW
+B='\e[01;34m'    # BLUE
+V='\e[01;35m'    # VIOLET
+Bl='\e[01;30m'   # BLACK
+C='\e[01;36m'    # CYAN
+W='\e[01;37m'    # WHITE
+N='\e[00;37;40m' # How to use (example): echo "${G}example${N}"
 
 #=========================== Main
-clear
+# > You can start your MOD here.
+# > You can add functions, variables & etc here.
+# > Rather than editing the default vars above.
 
-show_rein=0
+
+# Terminal Debloater
+# by veez21
+clear
+echo "$div"
+echo "${W}$MODTITLE $VER${N}${Bl}($REL)${N}"
+echo "by ${W}$AUTHOR${N}"
+echo "$div"
 
 get_app_name() {
   if [ -x /system/bin/aapt ]; then
@@ -116,6 +138,7 @@ list_unin_app() {
   fi
 }
 
+show_rein=0
 if [ -d $MODDIR/system/app ]; then
   for i in $MODDIR/system/app/*; do
     if [ -f $i/.replace ]; then
@@ -132,10 +155,6 @@ elif [ -d $MODDIR/system/priv-app ]; then
   done
 fi
 
-echo "$div"
-echo "${R}Terminal Debloater${N} ${W}$VER${N}(${Bl}${REL}${N})"
-echo "by veez21 @ xda-developers"
-echo "$div"
 echo ""
 if [ -d /system/app ]; then
   echo " 1 - ${W}System Apps${N}"
@@ -154,10 +173,10 @@ if [ "$choice" == "1" ]; then
   if [ -d /system/app ]; then
     clear
     echo "$div"
-    echo "${R}System Apps${N}"
+    echo "${W}System Apps${N}"
     echo "$div"
     echo ""
-    echo "${G}Loading Apps...${N}"
+    echo "${W}Loading Apps...${N}"
     list_system_app 2>/dev/null
     c=1
     for i in $(seq 1 $((${#app_name[@]}-1))); do
@@ -165,7 +184,7 @@ if [ "$choice" == "1" ]; then
       c=$((c+1))
     done
     echo ""
-    echo " m - ${G}Uninstall Multiple${N}"
+    echo " m - ${R}Uninstall Multiple${N}"
     echo " 0 - ${Bl}Exit${N}"
     echo "$div"
     echo -n "[CHOICE]: "
@@ -219,10 +238,10 @@ elif [ "$choice" == 2 ]; then
   if [ -d /system/priv-app ]; then
     clear
     echo "$div"
-    echo "${R}System Priv-Apps${N}"
+    echo "${W}System Priv-Apps${N}"
     echo "$div"
     echo ""
-    echo "${G}Loading Apps...${N}"
+    echo "${W}Loading Apps...${N}"
     list_system_priv-app 2>/dev/null
     c=1
     for i in $(seq 1 $((${#app_name[@]}-1))); do
@@ -230,7 +249,7 @@ elif [ "$choice" == 2 ]; then
       c=$((c+1))
     done
     echo ""
-    echo " m - ${G}Uninstall Multiple${N}"
+    echo " m - ${R}Uninstall Multiple${N}"
     echo " 0 - ${Bl}Exit${N}"
     echo "$div"
     echo -n "[CHOICE]: "
@@ -284,7 +303,7 @@ elif [ "$choice" == 3 ]; then
   if [ $show_rein == 1 ]; then
     clear
     echo "$div"
-    echo "${R}Reinstall${N}"
+    echo "${W}Reinstall${N}"
     echo "$div"
     echo ""
     list_unin_app
@@ -309,8 +328,8 @@ elif [ "$choice" == 3 ]; then
     exit 1
   fi
 
-#======================================================================
-elif [ "$app" == "0" ]; then
+#=========================== No need to touch this
+elif [ "$choice" == "0" ]; then
   exit 
 else echo Invalid
   exit 1
