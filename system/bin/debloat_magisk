@@ -7,12 +7,18 @@
 # > ENTER MAGISK MODULE ID HERE
 ID="terminal_debloater"
 
+#=========================== Log File
+# > Logs should go in this file
+LOG=/magisk/${ID}/terminal.log
+
 #=========================== Set Busybox (Used by Magisk) up
 # > Do not touch!
-alias busybox=/data/magisk/busybox
+alias busybox=/data/magisk/busybox; c=0
 for i in $(busybox --list); do
-	if [ $i != 'echo' ]; then
+	if [ $i != 'echo' ] || [ $c -ge 5 ]; then
 		alias $i="/data/magisk/busybox $i"
+  else
+    c=$((c+1))
 	fi
 done
 
@@ -37,6 +43,12 @@ mktouch() {
     echo $2 > $1
   fi
   chmod 644 $1
+}
+
+runl() {
+  echo "[$(date +"%F %T")]: $@" >> $LOG 2>>$LOG
+  $@ 2>>$LOG
+  return $?
 }
 
 #=========================== Default Variables
@@ -72,8 +84,28 @@ echo "${W}$MODTITLE $VER${N}${Bl}($REL)${N}"
 echo "by ${W}$AUTHOR${N}"
 echo "$div"
 
+show_rein=0
+if [ -d $MODDIR/system/app ]; then
+  for i in $MODDIR/system/app/*; do
+    if [ -f $i/.replace ]; then
+      show_rein=1
+      break
+    fi
+  done
+elif [ -d $MODDIR/system/priv-app ]; then
+  for i in $MODDIR/system/priv-app/*; do
+    if [ -f $i/.replace ]; then
+      show_rein=1
+      break
+    fi
+  done
+fi
+
+use_aapt=0
+[[ "$(which aapt)" ]] && let use_aapt=1
+
 get_app_name() {
-  if [ -x /system/bin/aapt ]; then
+  if [ -x /system/bin/aapt ] || [ -x /system/xbin/aapt ] || [ $use_aapt == 1 ]; then
     app_name=$(aapt dump badging $1/${name[$2]}.apk | grep 'application-label:' 2>/dev/null)
     if [ $? -gt 0 ]; then
       app_name[$2]=${name[$2]}
@@ -138,23 +170,6 @@ list_unin_app() {
   fi
 }
 
-show_rein=0
-if [ -d $MODDIR/system/app ]; then
-  for i in $MODDIR/system/app/*; do
-    if [ -f $i/.replace ]; then
-      show_rein=1
-      break
-    fi
-  done
-elif [ -d $MODDIR/system/priv-app ]; then
-  for i in $MODDIR/system/priv-app/*; do
-    if [ -f $i/.replace ]; then
-      show_rein=1
-      break
-    fi
-  done
-fi
-
 echo ""
 if [ -d /system/app ]; then
   echo " 1 - ${W}System Apps${N}"
@@ -211,8 +226,8 @@ if [ "$choice" == "1" ]; then
       else
         c=1
         for i in ${multiple[@]}; do
-          echo "Uninstalling ${R}${app_name[${choice[$c]}]}${N}" | tr '_' ' '
-          mktouch $i/.replace ${app_name[${choice[$c]}]}
+          runl echo "Uninstalling ${R}${app_name[${choice[$c]}]}${N}" | tr '_' ' '
+          runl mktouch $i/.replace ${app_name[${choice[$c]}]}
           sleep 0.5
           c=$((c+1))
         done
@@ -224,9 +239,9 @@ if [ "$choice" == "1" ]; then
     elif [ "$app" == "0" ]; then
       exit
     else
-      echo "Uninstalling ${R}${app_name[$app]}${N}" | tr '_' ' '
+      runl echo "Uninstalling ${R}${app_name[$app]}${N}" | tr '_' ' '
       sleep 1
-      mktouch $MODDIR${app[$app]}/.replace ${app_name[$app]}
+      runl mktouch $MODDIR${app[$app]}/.replace ${app_name[$app]}
       echo "Reboot to apply changes"
       exit
     fi
@@ -276,8 +291,8 @@ elif [ "$choice" == 2 ]; then
       else
         c=1
         for i in ${multiple[@]}; do
-          echo "Uninstalling ${R}${app_name[${choice[$c]}]}${N}" | tr '_' ' '
-          mktouch $i/.replace ${app_name[${choice[$c]}]}
+          runl echo "Uninstalling ${R}${app_name[${choice[$c]}]}${N}" | tr '_' ' '
+          runl mktouch $i/.replace ${app_name[${choice[$c]}]}
           sleep 0.5
           c=$((c+1))
         done
@@ -289,9 +304,9 @@ elif [ "$choice" == 2 ]; then
     elif [ "$privapp" == "0" ]; then
       exit
     else
-      echo "Uninstalling ${R}${app_name[$privapp]}${N}" | tr '_' ' ' 
+      runl echo "Uninstalling ${R}${app_name[$privapp]}${N}" | tr '_' ' ' 
       sleep 1
-      mktouch $MODDIR${privapp[$privapp]}/.replace ${app_name[$privapp]}
+      runl mktouch $MODDIR${privapp[$privapp]}/.replace ${app_name[$privapp]}
       echo "Reboot to apply changes"
       exit
     fi
@@ -317,9 +332,9 @@ elif [ "$choice" == 3 ]; then
     elif [ "$rein" == "0" ]; then
       exit
     else
-      echo "Reinstalling ${G}${name_unin[$rein]}${N}" | tr '_' ' '
+      runl echo "Reinstalling ${G}${name_unin[$rein]}${N}" | tr '_' ' '
       sleep 1
-      rm -rf ${unin_app[$rein]}
+      runl rm -rf ${unin_app[$rein]}
       echo "Reboot to apply changes"
       exit
     fi
@@ -330,9 +345,9 @@ elif [ "$choice" == 3 ]; then
 
 #=========================== No need to touch this
 elif [ "$choice" == "0" ]; then
-  exit 
+  runl exit 
 else echo Invalid
-  exit 1
+  runl exit 1
 fi
 
 exit $?
