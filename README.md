@@ -10,4 +10,4 @@ Just enter this command in Terminal Emulator:
 And you will be presented with a list of app names inside /system.
 Just reboot and you will have it removed, systemless-ly :D
 
-# Thanks is always appreciated :)
+#### Thanks is always appreciated :)
