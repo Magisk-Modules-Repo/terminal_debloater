@@ -106,17 +106,21 @@ set_permissions() {
 detect_unin() {
   if [ -d /magisk/$MODID ]; then
     c=1
+    boruto_uzumaki=0
     for i in $(find /magisk/$MODID -name '.replace'); do
-	  export unin_app_$c=$i
+      export unin_app_$c=$i
       c=$((c+1))
-	done
+      boruto_uzumaki=1
+    done
   fi
 }
 
 reuninstall() {
-  for i in $(set | grep 'unin_app_'); do
-    app=${i#*=}
-    app=$(echo $app | tr -d "'")
-    mktouch $app
-  done
+  if [ $boruto_uzumaki == 1 ]; then
+    for i in $(set | grep 'unin_app_'); do
+      app=${i#*=}
+      app=$(echo $app | tr -d "'")
+      mktouch $app
+    done
+  fi
 }

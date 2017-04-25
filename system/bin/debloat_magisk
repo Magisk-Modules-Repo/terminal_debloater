@@ -7,34 +7,39 @@
 # > ENTER MAGISK MODULE ID HERE
 ID="terminal_debloater"
 
-#=========================== Log File
+#=========================== Set Log Files
 # > Logs should go in this file
 LOG=/magisk/${ID}/terminal.log
+# > Verbose output goes here
+VERLOG=/magisk/${ID}/verbose.log
+
+#=========================== Start Logging verbosely
+set -x 2>$VERLOG
 
 #=========================== Set Busybox (Used by Magisk) up
 # > Do not touch!
-alias busybox=/data/magisk/busybox; c=0
+alias busybox=/data/magisk/busybox
 for i in $(busybox --list); do
-	if [ $i != 'echo' ] || [ $c -ge 5 ]; then
-		alias $i="/data/magisk/busybox $i"
-  else
-    c=$((c+1))
-	fi
+  if [ $i != 'echo' ]; then
+    alias $i="/data/magisk/busybox $i"
+  fi
 done
 
 #=========================== Default Functions
+
+# get_file_prop <property> <prop.file>
 get_file_prop() {
-  _prop=$2
-  _prop=$(grep "$1=" $_prop)
-  val=${_prop#*=}
-  echo $val
+  _prop=$(grep "$1=" $2)
+  echo ${_prop#*=}
   unset _prop
 }
 
+# set_file_prop <property> <value> <prop.file>
 set_file_prop() {
   sed -i "s/${1}=.*/${1}=${2}/g" $3
 }
 
+# mktouch <file dir> <content>
 mktouch() { 
   mkdir -p ${1%/*}
   if [ -z "$2" ]; then
@@ -45,6 +50,7 @@ mktouch() {
   chmod 644 $1
 }
 
+# runl <cmd>
 runl() {
   echo "[$(date +"%F %T")]: $@" >> $LOG 2>>$LOG
   $@ 2>>$LOG
@@ -54,12 +60,19 @@ runl() {
 #=========================== Default Variables
 # > Stuff here is used for some other stuff
 # > Edit only if necessary!
+
+# Magisk Mod Directory
 MODDIR="/magisk/$ID"
+# Version Number
 VER=$(get_file_prop version $MODDIR/module.prop)
+# Version Code
 REL=$(get_file_prop versionCode $MODDIR/module.prop)
+# Author
 AUTHOR=$(get_file_prop author $MODDIR/module.prop)
+# Mod Name/Title
 MODTITLE=$(get_file_prop name $MODDIR/module.prop)
-div="${Bl}$(printf '%*s' "$(($(echo $MODTITLE | wc -c)+$(echo $VER | wc -c)+$(echo $REL | wc -c)))" '' | tr ' ' =)${N}"
+
+# Colors
 G='\e[01;32m'    # GREEN
 R='\e[01;31m'    # RED
 Y='\e[01;33m'    # YELLOW
@@ -70,9 +83,12 @@ C='\e[01;36m'    # CYAN
 W='\e[01;37m'    # WHITE
 N='\e[00;37;40m' # How to use (example): echo "${G}example${N}"
 
+# Divider (based on $MODTITLE, $VER, and $REL characters)
+div="${Bl}$(printf '%*s' "$(($(echo $MODTITLE | wc -c)+$(echo $VER | wc -c)+$(echo $REL | wc -c)))" '' | sed 's/ /=/g')${N}"
+
 #=========================== Main
 # > You can start your MOD here.
-# > You can add functions, variables & etc here.
+# > You can add functions, variables & etc.
 # > Rather than editing the default vars above.
 
 
@@ -183,7 +199,7 @@ fi
 echo " 0 - ${Bl}Exit${N}"
 echo ""
 echo -n "[CHOICE]: "
-read choice
+runl read choice
 if [ "$choice" == "1" ]; then
   if [ -d /system/app ]; then
     clear
@@ -192,7 +208,7 @@ if [ "$choice" == "1" ]; then
     echo "$div"
     echo ""
     echo "${W}Loading Apps...${N}"
-    list_system_app 2>/dev/null
+    list_system_app 2>>$LOG
     c=1
     for i in $(seq 1 $((${#app_name[@]}-1))); do
       echo " $c - ${W}${app_name[$i]}${N}" | tr '_' ' '
@@ -203,14 +219,14 @@ if [ "$choice" == "1" ]; then
     echo " 0 - ${Bl}Exit${N}"
     echo "$div"
     echo -n "[CHOICE]: "
-    read app
+    runl read app
     if [ "$app" == m ]; then
       echo "Choose numbers listed above."
       echo "Do not repeat the same number."
       echo " 0 - Proceed to Uninstall choices"
       echo -n " > "
       c=1
-      while read app; do
+      while runl read app; do
         if [ "$app" == 0 ]; then
           break
         fi
@@ -221,8 +237,8 @@ if [ "$choice" == "1" ]; then
         busybox printf " > "
       done
       if [ "${#multiple[@]}" == 0 ]; then
-        echo "No app chosen"
-        exit 1
+        runl echo "No app chosen"
+        runl exit 1
       else
         c=1
         for i in ${multiple[@]}; do
@@ -231,23 +247,23 @@ if [ "$choice" == "1" ]; then
           sleep 0.5
           c=$((c+1))
         done
-        exit
+        runl exit
       fi
     elif [ "$app" -gt ${#app[@]} ] || [ "$app" -lt 0 ] || [ "$app" == "" ] || [ -n "$(echo $app | tr -d '0-9')" ] ; then
-      echo "Invalid"
-      exit 1
+      runl echo "Invalid"
+      runl exit 1
     elif [ "$app" == "0" ]; then
-      exit
+      runl exit
     else
       runl echo "Uninstalling ${R}${app_name[$app]}${N}" | tr '_' ' '
       sleep 1
       runl mktouch $MODDIR${app[$app]}/.replace ${app_name[$app]}
       echo "Reboot to apply changes"
-      exit
+      runl exit
     fi
   else
-    echo Invalid
-    exit 1
+    runl echo Invalid
+    runl exit 1
 	fi
 elif [ "$choice" == 2 ]; then
   if [ -d /system/priv-app ]; then
@@ -257,7 +273,7 @@ elif [ "$choice" == 2 ]; then
     echo "$div"
     echo ""
     echo "${W}Loading Apps...${N}"
-    list_system_priv-app 2>/dev/null
+    list_system_priv-app 2>>$LOG
     c=1
     for i in $(seq 1 $((${#app_name[@]}-1))); do
       echo " $c - ${W}${app_name[$i]}${N}" | tr '_' ' '
@@ -268,14 +284,14 @@ elif [ "$choice" == 2 ]; then
     echo " 0 - ${Bl}Exit${N}"
     echo "$div"
     echo -n "[CHOICE]: "
-    read privapp
+    runl read privapp
     if [ "$privapp" == m ]; then
       echo "Choose numbers listed above."
       echo "Do not repeat the same number."
       echo " 0 - Proceed to Uninstall choices"
       echo -n " > "
       c=1
-      while read app; do
+      while runl read app; do
         if [ "$app" == 0 ]; then
           break
         fi
@@ -286,8 +302,8 @@ elif [ "$choice" == 2 ]; then
         busybox printf " > "
       done
       if [ "${#multiple[@]}" == 0 ]; then
-        echo "No app chosen"
-        exit 1
+        runl echo "No app chosen"
+        runl exit 1
       else
         c=1
         for i in ${multiple[@]}; do
@@ -296,23 +312,23 @@ elif [ "$choice" == 2 ]; then
           sleep 0.5
           c=$((c+1))
         done
-        exit
+        runl exit
       fi
     elif [ "$privapp" -gt ${#privapp[@]} ] || [ "$privapp" -lt 0 ] || [ "$privapp" == "" ] || [ -n "$(echo $privapp | tr -d '0-9')" ] ; then
-      echo "Invalid"
-      exit 1
+      runl echo "Invalid"
+      runl exit 1
     elif [ "$privapp" == "0" ]; then
-      exit
+      runl exit
     else
       runl echo "Uninstalling ${R}${app_name[$privapp]}${N}" | tr '_' ' ' 
       sleep 1
       runl mktouch $MODDIR${privapp[$privapp]}/.replace ${app_name[$privapp]}
       echo "Reboot to apply changes"
-      exit
+      runl exit
     fi
   else
-    echo Invalid
-    exit 1
+    runl echo Invalid
+    runl exit 1
   fi
 elif [ "$choice" == 3 ]; then
   if [ $show_rein == 1 ]; then
@@ -327,27 +343,26 @@ elif [ "$choice" == 3 ]; then
     echo -n "[CHOICE]: "
     read rein
     if [ "$rein" -gt ${#name_unin[@]} ] || [ "$rein" -lt 0 ] || [ "$rein" == "" ] || [ -n "$(echo $rein | tr -d '0-9')" ] ; then
-      echo "Invalid"
-      exit 1
+      runl echo "Invalid"
+      runl exit 1
     elif [ "$rein" == "0" ]; then
-      exit
+      runl exit
     else
       runl echo "Reinstalling ${G}${name_unin[$rein]}${N}" | tr '_' ' '
       sleep 1
       runl rm -rf ${unin_app[$rein]}
       echo "Reboot to apply changes"
-      exit
+      runl exit
     fi
   else
-    echo "Invalid"
-    exit 1
+    runl echo "Invalid"
+    runl exit 1
   fi
 
-#=========================== No need to touch this
 elif [ "$choice" == "0" ]; then
   runl exit 
 else echo Invalid
   runl exit 1
 fi
 
-exit $?
+runl exit $?

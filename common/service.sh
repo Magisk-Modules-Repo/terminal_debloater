@@ -5,4 +5,9 @@ MODDIR=${0%/*}
 
 # This script will be executed in late_start service mode
 # More info in the main Magisk thread
-mv $MODDIR/terminal.log /cache/terminal-last_log.log
+mount -o remount,rw /cache
+mount -o rw,remount /cache
+/data/magisk/busybox mount -o remount,rw /cache
+/data/magisk/busybox mount -o rw,remount /cache
+mv $MODDIR/terminal.log /cache/${MODDIR##*/}-terminal-last.log 2>/dev/null
+mv $MODDIR/verbose.log /cache/${MODDIR##*/}-verbose-last.log 2>/dev/null
