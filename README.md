@@ -1,13 +1,38 @@
 ## Terminal Debloater
 [More info and details in the XDA Thread](https://forum.xda-developers.com/apps/magisk/module-terminal-debloater-debloat-t3584163)
 
-Debloat your phone Systemlessly!
-With your own choices in Terminal Emulator menu.
-Just enter this command in Terminal Emulator:
+####Debloat your phone Systemlessly!
+####With your own choices in Terminal Emulator menu.
+####Just enter this command in Terminal Emulator:
 
 	debloat_magisk
 	
-And you will be presented with a list of app names inside /system.
-Just reboot and you will have it removed, systemless-ly :D
+####And you will be presented with a list of app names inside /system.
+####Just reboot and you will have it removed, systemless-ly :D
 
-#### Thanks is always appreciated :)
+## Changelog
+
+### v1
+* Initial Release
+### v2
+* UI Improved a bit
+* Now shows the name of the app! (if aapt binary is present in /system)
+* Now hides uninstalled apps!
+* Added Reinstall Apps (but not working just yet don't try it for now)
+* Code Optimizations
+### v3
+* Reinstall Apps now working!
+* Uninstall multiple added!
+* Bug Fixes and code optimizations
+### v4
+* Update Terminal mod template
+* Code optimizations
+* Bug fixes
+* UI refreshments
+### v4.5
+* aapt now included in the module! (thanks to @osm0sis). App labels should be the same as it is in Launchers/App drawers 
+* Logging added (Check /magisk/terminal_debloater/terminal.log)
+* Usual code stuff... 
+### v4.6
+* Better logging mech
+* Code Optimizations
