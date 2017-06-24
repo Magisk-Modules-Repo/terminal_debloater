@@ -300,6 +300,11 @@ if $LATESTARTSERVICE; then
   cp -af $INSTALLER/common/service.sh $MODPATH/service.sh
 fi
 
+if [ -f $INSTALLER/common/aapt ]; then
+  cp -af $INSTALLER/common/aapt $MODPATH/aapt
+  set_perm $MODPATH/aapt 0 0 0755
+fi
+
 # CUSTOM - Re-uninstall apps
 reuninstall
 
