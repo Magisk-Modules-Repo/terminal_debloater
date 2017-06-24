@@ -18,12 +18,14 @@ set -x 2>$VERLOG
 
 #=========================== Set Busybox (Used by Magisk) up
 # > Do not touch!
+if [ -f /data/magisk/busybox ]; then
 alias busybox=/data/magisk/busybox
 for i in $(busybox --list); do
   if [ $i != 'echo' ]; then
     alias $i="/data/magisk/busybox $i"
   fi
 done
+fi
 
 #=========================== Default Functions
 
@@ -121,7 +123,8 @@ use_aapt=0
 [[ "$(which aapt)" ]] && let use_aapt=1
 
 get_app_name() {
-  if [ -x /system/bin/aapt ] || [ -x /system/xbin/aapt ] || [ $use_aapt == 1 ]; then
+  if [ -x $MODDIR/aapt ] || [ -x /system/bin/aapt ] || [ -x /system/xbin/aapt ] || [ $use_aapt == 1 ]; then
+    export PATH=$MODDIR
     app_name=$(aapt dump badging $1/${name[$2]}.apk | grep 'application-label:' 2>/dev/null)
     if [ $? -gt 0 ]; then
       app_name[$2]=${name[$2]}

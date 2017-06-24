@@ -39,3 +39,6 @@
 ### v4.6
 * Better logging mech
 * Code Optimizations
+### v5
+* Fix busybox detection in Magisk v13
+* Move aapt
