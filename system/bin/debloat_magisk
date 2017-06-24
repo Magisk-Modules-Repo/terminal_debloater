@@ -124,7 +124,7 @@ use_aapt=0
 
 get_app_name() {
   if [ -x $MODDIR/aapt ] || [ -x /system/bin/aapt ] || [ -x /system/xbin/aapt ] || [ $use_aapt == 1 ]; then
-    export PATH=$MODDIR
+    export PATH=$MODDIR:$PATH
     app_name=$(aapt dump badging $1/${name[$2]}.apk | grep 'application-label:' 2>/dev/null)
     if [ $? -gt 0 ]; then
       app_name[$2]=${name[$2]}
