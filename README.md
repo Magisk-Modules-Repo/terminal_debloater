@@ -42,3 +42,5 @@
 ### v5
 * Fix busybox detection in Magisk v13
 * Move aapt
+### v5.1
+* Fix errors
