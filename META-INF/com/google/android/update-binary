@@ -215,6 +215,9 @@ if [ "$ACTION" == "Install" ]; then
   # service mode scripts
   $LATESTARTSERVICE && cp -af $INSTALLER/common/service.sh $MODPATH/service.sh
 
+  # ReUninstall apps
+  reuninstall
+
   ui_print "- Setting permissions"
   set_permissions
 
