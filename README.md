@@ -44,3 +44,7 @@
 * Move aapt
 ### v5.1
 * Fix errors
+### v6
+* Update module template
+### v6.1
+* Installation fixes
