@@ -48,3 +48,5 @@
 * Update module template
 ### v6.1
 * Installation fixes
+### v6.2
+* System Apps that were updated will no longer persist
