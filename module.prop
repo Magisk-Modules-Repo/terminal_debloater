@@ -1,7 +1,7 @@
 id=terminal_debloater
 name=Terminal Emulator Debloater
-version=v6.3
-versionCode=13
+version=v6.4
+versionCode=14
 author=veez21
 description=Debloat your device Systemless-ly! With choices for debloating in Terminal Emulator for every device!
 template=1400

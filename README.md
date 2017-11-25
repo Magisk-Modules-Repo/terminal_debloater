@@ -50,3 +50,5 @@
 * Installation fixes
 ### v6.2
 * System Apps that were updated will no longer persist
+### v6.4
+* Adjust to Magisk v14.5's changes
