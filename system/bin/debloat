@@ -8,16 +8,32 @@
 ID="terminal_debloater"
 
 #=========================== Set Log Files
+mount -o remount,rw /cache 2>/dev/null
+mount -o rw,remount /cache 2>/dev/null
 # > Logs should go in this file
-LOG=/magisk/${ID}/terminal.log
+LOG=/cache/${ID}.log
 # > Verbose output goes here
-VERLOG=/magisk/${ID}/verbose.log
+VERLOG=/cache/${ID}-verbose.log
 
 #=========================== Start Logging verbosely
 set -x 2>$VERLOG
 
+#=========================== Determine if A/B OTA device
+#ABDeviceCheck=$(cat /proc/cmdline | grep slot_suffix | wc -l)
+if [ -d /system_root ]; then
+  isABDevice=true
+  SYSTEM=/system_root/system
+  SYSTEM2=/system
+else
+  isABDevice=false
+  SYSTEM=/system
+  SYSTEM2=/system
+fi
+
+
 #=========================== Set Busybox (Used by Magisk) up
 # > Do not touch!
+_busybox=false
 if [ -f /data/magisk/busybox ]; then
   alias busybox=/data/magisk/busybox
   for i in $(busybox --list); do
@@ -25,6 +41,7 @@ if [ -f /data/magisk/busybox ]; then
       alias $i="/data/magisk/busybox $i"
     fi
   done
+  _busybox=true
 elif [ -f /data/data/com.topjohnwu.magisk/lib/libbusybox.so ]; then
   cp /data/data/com.topjohnwu.magisk/lib/libbusybox.so /cache/busybox
   chmod 755 /cache/busybox; chown 0.0 /cache/busybox
@@ -34,17 +51,21 @@ elif [ -f /data/data/com.topjohnwu.magisk/lib/libbusybox.so ]; then
       alias $i="/cache/busybox $i"
     fi
   done
+  _busybox=true
 elif [ -d /sbin/.core/busybox ]; then
   PATH=$PATH:/sbin/.core/busybox
+  _busybox=true
 else
   alias busybox=""
 fi
-if [ -x /system/xbin/busybox ]; then
+if [ -x $SYSTEM/xbin/busybox ]; then
   true
-elif [ -x /system/bin/busybox ]; then
+elif [ -x $SYSTEM/bin/busybox ]; then
   true
 elif [ -x /data/data/com.topjohnwu.magisk/busybox/busybox ]; then
   export PATH=$PATH:/data/data/com.topjohnwu.magisk/busybox
+elif [ $_busybox ]; then
+  true
 else
   echo "! Busybox not detected.."
   echo "Please install one (@osm0sis' busybox recommended)"
@@ -136,15 +157,15 @@ echo "by ${W}$AUTHOR${N}"
 echo "$div"
 
 show_rein=0
-if [ -d $MODDIR/system/app ]; then
-  for i in $MODDIR/system/app/*; do
+if [ -d $MODDIR$SYSTEM2/app ]; then
+  for i in $MODDIR$SYSTEM2/app/*; do
     if [ -f $i/.replace ]; then
       show_rein=1
       break
     fi
   done
-elif [ -d $MODDIR/system/priv-app ]; then
-  for i in $MODDIR/system/priv-app/*; do
+elif [ -d $MODDIR$SYSTEM2/priv-app ]; then
+  for i in $MODDIR$SYSTEM2/priv-app/*; do
     if [ -f $i/.replace ]; then
       show_rein=1
       break
@@ -156,7 +177,7 @@ use_aapt=0
 [[ "$(which aapt)" ]] && let use_aapt=1
 
 get_app_name() {
-  if [ -x $MODDIR/aapt ] || [ -x /system/bin/aapt ] || [ -x /system/xbin/aapt ] || [ $use_aapt == 1 ]; then
+  if [ -x $MODDIR/aapt ] || [ -x $SYSTEM/bin/aapt ] || [ -x $SYSTEM/xbin/aapt ] || [ $use_aapt == 1 ]; then
     export PATH=$MODDIR:$PATH
     app_name=$(aapt dump badging $1/${name[$2]}.apk | grep 'application-label:' 2>/dev/null)
     if [ $? -gt 0 ]; then
@@ -177,8 +198,8 @@ get_app_name() {
 list_system_app() {
   c=1
   x=1
-  for i in $(ls /system/app); do
-    app[$x]=/system/app/$i
+  for i in $(ls $SYSTEM/app); do
+    app[$x]=$SYSTEM/app/$i
     if [ ! -d $MODDIR${app[$x]} ]; then
       name[$x]=${i%/*}
       get_app_name ${app[$x]} $x
@@ -190,8 +211,8 @@ list_system_app() {
 list_system_priv-app() {
   c=1
   x=1
-  for i in $(ls /system/priv-app); do
-    privapp[$x]=/system/priv-app/$i
+  for i in $(ls $SYSTEM/priv-app); do
+    privapp[$x]=$SYSTEM/priv-app/$i
     if [ ! -d $MODDIR${privapp[$x]} ]; then
       name[$x]=${i%/*}
       get_app_name ${privapp[$x]} $x
@@ -202,22 +223,22 @@ list_system_priv-app() {
 
 list_unin_app() {
   c=1
-  if [ -d /system/app ] && [ -d $MODDIR/system/app ]; then
-    for i in $(ls $MODDIR/system/app); do
-      unin_app[$c]=$MODDIR/system/app/$i
-      name_unin[$c]=$(cat $MODDIR/system/app/$i/.replace)
-      if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR/system/app/$i/.replace) ]]; then
+  if [ -d $SYSTEM/app ] && [ -d $MODDIR$SYSTEM2/app ]; then
+    for i in $(ls $MODDIR$SYSTEM2/app); do
+      unin_app[$c]=$MODDIR$SYSTEM2/app/$i
+      name_unin[$c]=$(cat $MODDIR$SYSTEM2/app/$i/.replace)
+      if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/app/$i/.replace) ]]; then
         name_unin[$c]=$i
       fi
       echo " $c - ${W}${name_unin[$c]}${N}" | tr '_' ' '
       c=$((c+1))
     done
   fi
-  if [ -d /system/priv-app ] && [ -d $MODDIR/system/priv-app ]; then
-    for i in $(ls $MODDIR/system/priv-app); do
-      unin_app[$c]=$MODDIR/system/priv-app/$i
-      name_unin[$c]=$(cat $MODDIR/system/priv-app/$i/.replace)
-      if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR/system/priv-app/$i/.replace) ]]; then
+  if [ -d $SYSTEM/priv-app ] && [ -d $MODDIR$SYSTEM2/priv-app ]; then
+    for i in $(ls $MODDIR$SYSTEM2/priv-app); do
+      unin_app[$c]=$MODDIR$SYSTEM2/priv-app/$i
+      name_unin[$c]=$(cat $MODDIR$SYSTEM2/priv-app/$i/.replace)
+      if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/priv-app/$i/.replace) ]]; then
         name_unin[$c]=$i
       fi
       echo " $c - ${W}${name_unin[$c]}${N}" | tr '_' ' '
@@ -227,10 +248,10 @@ list_unin_app() {
 }
 
 echo ""
-if [ -d /system/app ]; then
+if [ -d $SYSTEM/app ]; then
   echo " 1 - ${W}System Apps${N}"
 fi
-if [ -d /system/priv-app ]; then
+if [ -d $SYSTEM/priv-app ]; then
   echo " 2 - ${W}System Priv-Apps${N}"
 fi
 if [ $show_rein == 1 ]; then
@@ -242,7 +263,7 @@ echo ""
 echo -n "[CHOICE]: "
 runl read choice
 if [ "$choice" == "1" ]; then
-  if [ -d /system/app ]; then
+  if [ -d $SYSTEM/app ]; then
     clear
     echo "$div"
     echo "${W}System Apps${N}"
@@ -319,7 +340,7 @@ if [ "$choice" == "1" ]; then
     runl exit 1
 	fi
 elif [ "$choice" == 2 ]; then
-  if [ -d /system/priv-app ]; then
+  if [ -d $SYSTEM/priv-app ]; then
     clear
     echo "$div"
     echo "${W}System Priv-Apps${N}"
