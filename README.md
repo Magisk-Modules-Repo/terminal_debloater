@@ -15,40 +15,12 @@
 
 ## Changelog
 
-### v1
-* Initial Release
-### v2
-* UI Improved a bit
-* Now shows the name of the app! (if aapt binary is present in /system)
-* Now hides uninstalled apps!
-* Added Reinstall Apps (but not working just yet don't try it for now)
-* Code Optimizations
-### v3
-* Reinstall Apps now working!
-* Uninstall multiple added!
-* Bug Fixes and code optimizations
-### v4
-* Update Terminal mod template
-* Code optimizations
-* Bug fixes
-* UI refreshments
-### v4.5
-* aapt now included in the module! (thanks to @osm0sis). App labels should be the same as it is in Launchers/App drawers 
-* Logging added (Check /magisk/terminal_debloater/terminal.log)
-* Usual code stuff... 
-### v4.6
-* Better logging mech
-* Code Optimizations
-### v5
-* Fix busybox detection in Magisk v13
-* Move aapt
-### v5.1
-* Fix errors
-### v6
-* Update module template
-### v6.1
-* Installation fixes
-### v6.2
-* System Apps that were updated will no longer persist
-### v6.4
-* Adjust to Magisk v14.5's changes
+### v7
+* Cleaned changelog
+* Fixed unable to restore configuration when updating
+* A/B Devices support
+* Removed service.sh
+* Fix Busybox Detection
+### v7.1
+* A/B detection improved
+* Busybox Detection improved
