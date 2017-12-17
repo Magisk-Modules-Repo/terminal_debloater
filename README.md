@@ -24,3 +24,5 @@
 ### v7.1
 * A/B detection improved
 * Busybox Detection improved
+### v7.2
+* Fix Busybox Detection (again)
