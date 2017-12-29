@@ -33,32 +33,26 @@ fi
 
 #=========================== Set Busybox (Used by Magisk) up
 # > Do not touch!
+set_busybox() {
+  if [ -x "$1" ]; then
+    for i in $(${1} --list); do
+      if [ "$i" != 'echo' ]; then
+        alias "$i"="${1} $i"
+      fi
+    done
+    _busybox=true
+  fi
+}
 if [ ! -x $SYSTEM/xbin/busybox ]; then
-_busybox=false
-if [ -f /data/magisk/busybox ]; then
-  alias busybox=/data/magisk/busybox
-  for i in $(busybox --list); do
-    if [ $i != 'echo' ]; then
-      alias "$i"="/data/magisk/busybox $i"
-    fi
-  done
-  _busybox=true
-elif [ -f /data/data/com.topjohnwu.magisk/lib/libbusybox.so ]; then
-  cp /data/data/com.topjohnwu.magisk/lib/libbusybox.so /cache/busybox
-  chmod 755 /cache/busybox; chown 0.0 /cache/busybox
-  alias busybox=/cache/busybox
-  for i in $(busybox --list); do
-    if [ $i != 'echo' ]; then
-      alias "$i"="/cache/busybox $i"
-    fi
-  done
-  _busybox=true
-elif [ -d /sbin/.core/busybox ]; then
-  PATH=$PATH:/sbin/.core/busybox
-  _busybox=true
-else
-  alias busybox=""
-fi
+  _busybox=false
+  set_busybox /data/magisk/busybox
+  set_busybox /data/adb/magisk/busybox
+  if [ -d /sbin/.core/busybox ]; then
+    PATH=$PATH:/sbin/.core/busybox
+    _busybox=true
+  else
+    alias busybox=""
+  fi
 fi
 if [ -x $SYSTEM/xbin/busybox ]; then
   true
