@@ -26,3 +26,5 @@
 * Busybox Detection improved
 ### v7.2
 * Fix Busybox Detection (again)
+### v7.3
+* Update template
