@@ -110,6 +110,7 @@ detect_unin() {
   fi
   if [ -d "$MODPATH/system/priv-app" ]; then
     cp -rf $MODPATH/system/priv-app $TMPDIR/debloater
+	mitsuki=true
   fi
 }
 
