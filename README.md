@@ -33,3 +33,5 @@
 * Adapt to Magisk's recent changes
 * Display Busybox info
 * Rename *_*
+### v8.1
+* Use util_functions.sh
