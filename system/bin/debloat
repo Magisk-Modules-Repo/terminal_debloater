@@ -5,7 +5,12 @@
 
 # Magisk Module ID **
 # > ENTER MAGISK MODULE ID HERE
-ID="terminal_debloater"
+ID="terminal_systemizer"
+
+#=========================== Check root
+echo "test root" > /data/local/tmp/temp 2>/dev/null >/dev/null
+_name=$0; _name=${_name##*/}
+[ $? -ne 0 ] && echo "$_name needs to be in a root shell!" && echo "type 'su' then '$_name'" && exit 1
 
 #=========================== Set Log Files
 mount -o remount,rw /cache 2>/dev/null
@@ -29,7 +34,6 @@ else
   SYSTEM=/system
   SYSTEM2=/system
 fi
-
 
 #=========================== Set Busybox (Used by Magisk) up
 # > Do not touch!
@@ -79,27 +83,12 @@ fi
 
 #=========================== Default Functions
 
-# get_file_prop <property> <prop.file>
-get_file_prop() {
-  _prop=$(grep "$1=" $2)
-  echo ${_prop#*=}
-  unset _prop
-}
+# Import util_functions.sh
+[ -f /data/adb/magisk/util_functions.sh ] && . /data/adb/magisk/util_functions.sh || exit 1
 
 # set_file_prop <property> <value> <prop.file>
 set_file_prop() {
   sed -i "s/${1}=.*/${1}=${2}/g" $3
-}
-
-# mktouch <file dir> <content>
-mktouch() { 
-  mkdir -p ${1%/*}
-  if [ -z "$2" ]; then
-    touch $1
-  else
-    echo $2 > $1
-  fi
-  chmod 644 $1
 }
 
 #=========================== Default Variables
@@ -123,13 +112,13 @@ if [ ! -d $MODDIR ]; then
   fi
 fi
 # Version Number
-VER=$(get_file_prop version $MODDIR/module.prop)
+VER=$(grep_prop version $MODDIR/module.prop)
 # Version Code
-REL=$(get_file_prop versionCode $MODDIR/module.prop)
+REL=$(grep_prop versionCode $MODDIR/module.prop)
 # Author
-AUTHOR=$(get_file_prop author $MODDIR/module.prop)
+AUTHOR=$(grep_prop author $MODDIR/module.prop)
 # Mod Name/Title
-MODTITLE=$(get_file_prop name $MODDIR/module.prop)
+MODTITLE=$(grep_prop name $MODDIR/module.prop)
 
 # Colors
 G='\e[01;32m'    # GREEN
@@ -143,7 +132,7 @@ W='\e[01;37m'    # WHITE
 N='\e[00;37;40m' # How to use (example): echo "${G}example${N}"
 
 # Divider (based on $MODTITLE, $VER, and $REL characters)
-div="${Bl}$(printf '%*s' "$(($(echo $MODTITLE | wc -c)+$(echo $VER | wc -c)+$(echo $REL | wc -c)))" '' | sed 's/ /=/g')${N}"
+div="${Bl}$(printf '%*s' "$(($(echo $MODTITLE | wc -c)+$(echo $VER | wc -c)+$(echo $REL | wc -c)))" '' | tr "[a-zA-Z0-9]" '=')${N}"
 
 #=========================== Main
 # > You can start your MOD here.
