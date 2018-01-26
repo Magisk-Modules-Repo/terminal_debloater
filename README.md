@@ -35,3 +35,5 @@
 * Rename *_*
 ### v8.1
 * Use util_functions.sh
+### v8.2
+* Attempt to fix issues ;_;
