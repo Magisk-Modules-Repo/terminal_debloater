@@ -5,7 +5,7 @@
 
 # Magisk Module ID **
 # > ENTER MAGISK MODULE ID HERE
-ID="terminal_systemizer"
+ID="terminal_debloater"
 
 #=========================== Check root
 echo "test root" > /data/local/tmp/temp 2>/dev/null >/dev/null
