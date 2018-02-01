@@ -17,3 +17,6 @@
 
 ### v8.3
 * Fix "Module not detected"
+### v8.5
+* Add -nc options to disable colors
+* Add Progress Bar

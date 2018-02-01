@@ -87,7 +87,7 @@ set_permissions() {
   # The following is default permissions, DO NOT remove
   set_perm_recursive  $MODPATH  0  0  0755  0644
   cp -af $INSTALLER/common/aapt $MODPATH/aapt
-  set_perm $MODPATH/system/bin/debloat 0 0 0777
+  set_perm $MODPATH/system/xbin/debloat 0 0 0777
   set_perm $MODPATH/aapt 0 0 0755
 }
 
