@@ -20,3 +20,5 @@
 ### v8.5
 * Add -nc options to disable colors
 * Add Progress Bar
+### v8.6
+* Install in bin or in xbin if present
