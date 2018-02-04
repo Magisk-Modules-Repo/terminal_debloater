@@ -110,12 +110,14 @@ set_permissions() {
 detect_unin() {
   mkdir $TMPDIR/debloater
   mitsuki=false
-  if [ -d "$MODPATH/system/app" ]; then
-    cp -rf $MODPATH/system/app $TMPDIR/debloater
+  COPYPATH=$MODPATH
+  $BOOTMODE && COPYPATH=/sbin/.core/img
+  if [ -d "$COPYPATH/system/app" ]; then
+    cp -rf $COPYPATH/system/app $TMPDIR/debloater
     mitsuki=true
   fi
-  if [ -d "$MODPATH/system/priv-app" ]; then
-    cp -rf $MODPATH/system/priv-app $TMPDIR/debloater
+  if [ -d "$COPYPATH/system/priv-app" ]; then
+    cp -rf $COPYPATH/system/priv-app $TMPDIR/debloater
 	mitsuki=true
   fi
 }
