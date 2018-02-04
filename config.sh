@@ -111,7 +111,7 @@ detect_unin() {
   mkdir $TMPDIR/debloater
   mitsuki=false
   COPYPATH=$MODPATH
-  $BOOTMODE && COPYPATH=/sbin/.core/img
+  $BOOTMODE && COPYPATH=/sbin/.core/img/$MODID
   if [ -d "$COPYPATH/system/app" ]; then
     cp -rf $COPYPATH/system/app $TMPDIR/debloater
     mitsuki=true
