@@ -24,3 +24,5 @@
 * Install in bin or in xbin if present
 ### v8.7
 * Config now persists when updated through magisk manager
+### v8.8
+* Fix problems on A/B devices

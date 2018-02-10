@@ -88,10 +88,11 @@ set_permissions() {
   set_perm_recursive  $MODPATH  0  0  0755  0644
   cp -af $INSTALLER/common/aapt $MODPATH/aapt
   bin=bin
-  if [ -d /system/xbin ]; then
+  if (grep -q samsung /system/build.prop); then
     bin=xbin
 	mkdir $MODPATH/system/$bin
 	mv $MODPATH/system/bin/debloat $MODPATH/system/$bin
+	rm -rf $MODPATH/system/bin
   fi
   set_perm $MODPATH/system/$bin/debloat 0 0 0777
   set_perm $MODPATH/aapt 0 0 0755

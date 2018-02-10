@@ -201,10 +201,11 @@ fi
 
 use_aapt=0
 [[ "$(which aapt)" ]] && let use_aapt=1
+export PATH=$MODDIR:$PATH
+import_file=/cache/import-debloat.txt
 
 get_app_name() {
   if [ -x $MODDIR/aapt ] || [ -x $SYSTEM/bin/aapt ] || [ -x $SYSTEM/xbin/aapt ] || [ $use_aapt == 1 ]; then
-    export PATH=$MODDIR:$PATH
     app_name=$(aapt dump badging $1/${name[$2]}.apk | grep 'application-label:' 2>/dev/null)
     if [ $? -gt 0 ]; then
       app_name[$2]=${name[$2]}
@@ -224,9 +225,10 @@ get_app_name() {
 list_system_app() {
   c=1
   x=1
-  for i in $(ls $SYSTEM/app); do
-    app[$x]=$SYSTEM/app/$i
-    ProgressBar $c $(ls $SYSTEM/app | wc | awk '{print $1}')
+  system_apps($(ls $SYSTEM/app))
+  for i in ${system_apps[@]}; do
+    app[$x]=$SYSTEM2/app/$i
+    ProgressBar $c ${#system_apps[@]}
     if [ ! -d $MODDIR${app[$x]} ]; then
       name[$x]=${i%/*}
       get_app_name ${app[$x]} $x
@@ -238,9 +240,10 @@ list_system_app() {
 list_system_priv-app() {
   c=1
   x=1
-  for i in $(ls $SYSTEM/priv-app); do
-    privapp[$x]=$SYSTEM/priv-app/$i
-    ProgressBar $c $(ls $SYSTEM/priv-app | wc | awk '{print $1}')
+  system_privapp=($(ls $SYSTEM/priv-app))
+  for i in ${system_privapp[@]}; do
+    privapp[$x]=$SYSTEM2/priv-app/$i
+    ProgressBar $c ${#system_privapp[@]}
     if [ ! -d $MODDIR${privapp[$x]} ]; then
       name[$x]=${i%/*}
       get_app_name ${privapp[$x]} $x
@@ -273,6 +276,27 @@ list_unin_app() {
       c=$((c+1))
     done
   fi
+}
+
+import_list() {
+  if [ -f $import_file ]; then
+    c=1
+	import_apps=($(cat $import_file))
+    for i in ${import_apps[@]}; do
+	  ProgressBar $c ${#import_apps[@]}
+      name[$x]=${i%/*}
+      get_app_name $i $c
+	  mktouch $MODDIR/$i/.replace ${app_name[$c]}
+	  c=$((c+1))
+	done
+  fi
+}
+
+export_list() {
+  echo "" > $import_file
+  for i in $(find $MODDIR/system -name ".replace"); do
+    echo ${i%/*} >> $import_file
+  done
 }
 
 echo ""
