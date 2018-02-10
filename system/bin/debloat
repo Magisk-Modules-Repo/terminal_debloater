@@ -226,7 +226,7 @@ list_system_app() {
   c=1
   x=1
   system_apps($(ls $SYSTEM/app))
-  for i in ${system_apps[@]}; do
+  for i in $(ls $SYSTEM/app); do
     app[$x]=$SYSTEM2/app/$i
     ProgressBar $c ${#system_apps[@]}
     if [ ! -d $MODDIR${app[$x]} ]; then
@@ -241,7 +241,7 @@ list_system_priv-app() {
   c=1
   x=1
   system_privapp=($(ls $SYSTEM/priv-app))
-  for i in ${system_privapp[@]}; do
+  for i in $(ls $SYSTEM/priv-app); do
     privapp[$x]=$SYSTEM2/priv-app/$i
     ProgressBar $c ${#system_privapp[@]}
     if [ ! -d $MODDIR${privapp[$x]} ]; then
