@@ -225,7 +225,7 @@ get_app_name() {
 list_system_app() {
   c=1
   x=1
-  system_apps($(ls $SYSTEM/app))
+  system_apps=($(ls $SYSTEM/app))
   for i in $(ls $SYSTEM/app); do
     app[$x]=$SYSTEM2/app/$i
     ProgressBar $c ${#system_apps[@]}
