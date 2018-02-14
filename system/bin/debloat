@@ -206,7 +206,7 @@ import_file=/cache/import-debloat.txt
 
 get_app_name() {
   if [ -x $MODDIR/aapt ] || [ -x $SYSTEM/bin/aapt ] || [ -x $SYSTEM/xbin/aapt ] || [ $use_aapt == 1 ]; then
-    app_name=$(aapt dump badging $1/${name[$2]}.apk | grep 'application-label:' 2>/dev/null)
+    app_name=$(aapt dump badging $1/${name[$2]}.apk 2>$LOG | grep 'application-label:' 2>/dev/null)
     if [ $? -gt 0 ]; then
       app_name[$2]=${name[$2]}
       return
@@ -283,10 +283,11 @@ import_list() {
     c=1
 	import_apps=($(cat $import_file))
     for i in ${import_apps[@]}; do
-	  ProgressBar $c ${#import_apps[@]}
-      name[$x]=${i%/*}
-      get_app_name $i $c
-	  mktouch $MODDIR/$i/.replace ${app_name[$c]}
+      name[$c]=${i##*/}
+	  sys_dir=${i#*${MODDIR}}
+      get_app_name $sys_dir $c
+	  mktouch $i/.replace ${app_name[$c]}
+	  echo "${W}${app_name[$c]}${N} - Imported"
 	  c=$((c+1))
 	done
   fi
@@ -296,6 +297,7 @@ export_list() {
   echo "" > $import_file
   for i in $(find $MODDIR/system -name ".replace"); do
     echo ${i%/*} >> $import_file
+	echo "$(cat $i) - Imported"
   done
 }
 
@@ -308,7 +310,12 @@ if [ -d $SYSTEM/priv-app ]; then
 fi
 if [ $show_rein == 1 ]; then
   echo " 3 - ${W}Reinstall Uninstalled Apps${N}"
+  echo " e - ${W}Export Config${N}"
 fi
+if [ -f $import_file ]; then
+  echo " i - ${W}Import Condig ($import_file)"
+fi
+
 echo " d - ${C}Donate${N}"
 echo " 0 - ${Bl}Exit${N}"
 echo ""
@@ -497,6 +504,31 @@ elif [ "$choice" == 3 ]; then
   else
     echo "Invalid"
     exit 1
+  fi
+elif [ "$choice" == "e" ]; then
+  if [ $show_rein == 1 ]; then
+    clear
+	echo "Exporting to ${W}$import_file...${N}"
+	sleep 0.4
+	clear
+	export_list
+	echo "Done"
+	exit
+  else
+    echo "Invalid"
+	exit 1
+  fi
+elif [ "$choice" == "i" ]; then
+  if [ -f $import_file ]; then
+    clear
+	echo "Importing from ${W}$import_file...${N}"
+	sleep 0.4
+	import_list
+	echo "Done"
+	exit
+  else
+    echo "Invalid"
+	exit 1
   fi
 
 elif [ "$choice" == "d" ] || [ "$choice" == "D" ]; then
