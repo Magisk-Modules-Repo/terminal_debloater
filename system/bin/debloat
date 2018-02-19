@@ -297,7 +297,7 @@ export_list() {
   echo "" > $import_file
   for i in $(find $MODDIR/system -name ".replace"); do
     echo ${i%/*} >> $import_file
-	echo "$(cat $i) - Imported"
+	echo "$(cat $i) - Exported"
   done
 }
 
