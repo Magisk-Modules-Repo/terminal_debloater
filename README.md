@@ -11,7 +11,7 @@
  Just reboot and you will have it removed, systemless-ly
  
 ## Error?
- Send `/cache/terminal_debloater-vebose.log` in the XDA thread. I'll examine it for problems and will try to fix it.
+ Send `/cache/terminal_debloater-verbose.log` in the XDA thread. I'll examine it for problems and will try to fix it.
 
 ## Changelog
 
