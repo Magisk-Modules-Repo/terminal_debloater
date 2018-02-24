@@ -15,6 +15,8 @@
 
 ## Changelog
 
+### v9
+* Fixed typos
 ### v8.9
 * Add Import and export options
 ### v8.8
