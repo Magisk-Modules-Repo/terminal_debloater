@@ -15,6 +15,10 @@
 
 ## Changelog
 
+### v10
+* New way of debloating
+* Made debloating multiple apps easier (read the XDA Thread for instructions)
+* Fix xbin not getting deleted
 ### v9
 * Fixed typos
 ### v8.9

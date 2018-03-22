@@ -302,19 +302,13 @@ export_list() {
 }
 
 echo ""
-if [ -d $SYSTEM/app ]; then
-  echo " 1 - ${W}System Apps${N}"
-fi
-if [ -d $SYSTEM/priv-app ]; then
-  echo " 2 - ${W}System Priv-Apps${N}"
-fi
-if [ $show_rein == 1 ]; then
+[ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
+[ -d $SYSTEM/priv-app ] && echo " 2 - ${W}System Priv-Apps${N}"
+[ $show_rein == 1 ] && {
   echo " 3 - ${W}Reinstall Uninstalled Apps${N}"
   echo " e - ${W}Export Config${N}"
-fi
-if [ -f $import_file ]; then
-  echo " i - ${W}Import Condig ($import_file)"
-fi
+}
+[ -f $import_file ] && echo " i - ${W}Import Condig ($import_file)"
 
 echo " d - ${C}Donate${N}"
 echo " 0 - ${Bl}Exit${N}"
@@ -336,68 +330,34 @@ if [ "$choice" == "1" ]; then
       c=$((c+1))
     done
     echo ""
-    echo " m - ${R}Uninstall Multiple${N}"
+	echo " ${Bl}To uninstall multiple apps, enter multiple number. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
     echo " 0 - ${Bl}Exit${N}"
     echo "$div"
     echo -n "[CHOICE]: "
     read app
-    if [ "$app" == m ]; then
-      echo "Choose numbers listed above."
-      echo "Do not repeat the same number."
-      echo " 0 - Proceed to Uninstall choices"
-      echo -n " > "
-      c=1
-      while read app; do
-        if [ "$app" == 0 ]; then
-          break
-        fi
-        echo "Add to Queue: ${R}${app_name[$app]}${N}" | tr '_' ' '
-        multiple[$c]=$MODDIR${app[$app]}
-        choice[$c]=$app
-        c=$((c+1))
-        busybox printf " > "
-      done
-      if [ "${#multiple[@]}" == 0 ]; then
-        echo "No app chosen"
-        exit 1
-      else
-        c=1
-        for i in ${multiple[@]}; do
-          echo "Uninstalling ${R}${app_name[${choice[$c]}]}${N}" | tr '_' ' '
-          mktouch $i/.replace ${app_name[${choice[$c]}]}
-          if [ "${app_label[${choice[$c]}]}" ]; then
-            data_apkdir=$(echo /data/app/${app_label[${choice[$c]}]}-*)
-            if [ -d ${data_apkdir} ]; then
-              rm -rf ${data_apkdir} 2>/dev/null
-            fi
-          fi
-          sleep 0.5
-          c=$((c+1))
-        done
+	for i in $app; do
+	  if [ "$i" -gt ${#app[@]} ] || [ "$i" -lt 0 ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+	    echo "$i - Invalid"; false
+      elif [ "$i" == "0" ]; then
         exit
-      fi
-    elif [ "$app" -gt ${#app[@]} ] || [ "$app" -lt 0 ] || [ "$app" == "" ] || [ -n "$(echo $app | tr -d '0-9')" ] ; then
-      echo "Invalid"
-      exit 1
-    elif [ "$app" == "0" ]; then
-      exit
-    else
-      echo "Uninstalling ${R}${app_name[$app]}${N}" | tr '_' ' '
-      sleep 1
-      mktouch $MODDIR${app[$app]}/.replace ${app_name[$app]}
-      if [ "${app_label[$app]}" ]; then
-        data_apkdir=$(echo /data/app/${app_label[$app]}-*)
-        if [ -d ${data_apkdir} ]; then
-          rm -rf ${data_apkdir} 2>/dev/null
+	  else
+        echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
+        sleep 1
+        mktouch $MODDIR${app[$i]}/.replace ${app_name[$i]}
+        if [ "${app_label[$i]}" ]; then
+          data_apkdir=$(echo /data/app/${app_label[$i]}-*)
+          if [ -d ${data_apkdir} ]; then
+            rm -rf ${data_apkdir} 2>/dev/null
+          fi
         fi
-      fi
-      echo "Reboot to apply changes"
-      exit
-    fi
+	  fi
+	done
+    echo "Reboot to apply changes"
+    exit $?
   else
     echo Invalid
     exit 1
-	fi
+  fi
 elif [ "$choice" == 2 ]; then
   if [ -d $SYSTEM/priv-app ]; then
     clear
@@ -413,64 +373,28 @@ elif [ "$choice" == 2 ]; then
       c=$((c+1))
     done
     echo ""
-    echo " m - ${R}Uninstall Multiple${N}"
+	echo " ${Bl}To uninstall multiple apps, enter multiple number. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
     echo " 0 - ${Bl}Exit${N}"
     echo "$div"
     echo -n "[CHOICE]: "
     read privapp
-    if [ "$privapp" == m ]; then
-      echo "Choose numbers listed above."
-      echo "Do not repeat the same number."
-      echo " 0 - Proceed to Uninstall choices"
-      echo -n " > "
-      c=1
-      while read app; do
-        if [ "$app" == 0 ]; then
-          break
-        fi
-        echo "Add to Queue: ${R}${app_name[$app]}${N}" | tr '_' ' '
-        multiple[$c]=$MODDIR${privapp[$app]}
-        choice[$c]=$app
-        c=$((c+1))
-        busybox printf " > "
-      done
-      if [ "${#multiple[@]}" == 0 ]; then
-        echo "No app chosen"
-        exit 1
-      else
-        c=1
-        for i in ${multiple[@]}; do
-          echo "Uninstalling ${R}${app_name[${choice[$c]}]}${N}" | tr '_' ' '
-          mktouch $i/.replace ${app_name[${choice[$c]}]}
-          if [ "${app_label[${choice[$c]}]}" ]; then
-            data_apkdir=$(echo /data/app/${app_label[${choice[$c]}]}-*)
-            if [ -d ${data_apkdir} ]; then
-              rm -rf ${data_apkdir} 2>/dev/null
-            fi
-          fi
-          sleep 0.5
-          c=$((c+1))
-        done
+	for i in $privapp; do
+	  if [ "$i" -gt ${#privapp[@]} ] || [ "$i" -lt 0 ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+	    echo "$i - Invalid"; false
+      elif [ "$i" == "0" ]; then
         exit
-      fi
-    elif [ "$privapp" -gt ${#privapp[@]} ] || [ "$privapp" -lt 0 ] || [ "$privapp" == "" ] || [ -n "$(echo $privapp | tr -d '0-9')" ] ; then
-      echo "Invalid"
-      exit 1
-    elif [ "$privapp" == "0" ]; then
-      exit
-    else
-      echo "Uninstalling ${R}${app_name[$privapp]}${N}" | tr '_' ' ' 
-      sleep 1
-      mktouch $MODDIR${privapp[$privapp]}/.replace ${app_name[$privapp]}
-      if [ "${app_label[$privapp]}" ]; then
-        data_apkdir=$(echo /data/app/${app_label[$privapp]}-*)
-        if [ -d ${data_apkdir} ]; then
-          rm -rf ${data_apkdir} 2>/dev/null
+	  else
+        echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
+        sleep 1
+        mktouch $MODDIR${privapp[$i]}/.replace ${app_name[$i]}
+        if [ "${app_label[$i]}" ]; then
+          data_apkdir=$(echo /data/app/${app_label[$i]}-*)
+          if [ -d ${data_apkdir} ]; then
+            rm -rf ${data_apkdir} 2>/dev/null
+          fi
         fi
-      fi
-      echo "Reboot to apply changes"
-      exit
-    fi
+	  fi
+	done
   else
     echo Invalid
     exit 1
@@ -480,8 +404,10 @@ elif [ "$choice" == 3 ]; then
     clear
     echo "$div"
     echo "${W}Reinstall${N}"
-    echo " The apps debloated were reset
- to their factory version"
+	echo " You can also just delete your selected
+ folders in $MODDIR$SYSTEM2/app or priv-app."    
+	echo " The apps debloated were reset
+ to their factory version."
     echo "$div"
     echo ""
     list_unin_app
