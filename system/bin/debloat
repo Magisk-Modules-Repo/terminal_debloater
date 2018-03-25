@@ -9,22 +9,24 @@ ID="terminal_debloater"
 
 #=========================== Check root
 _name=$0; _name=${_name##*/}
-echo "test root" > /data/local/tmp/temp 2>/dev/null >/dev/null
-[ $? -ne 0 ] && echo "$_name needs to be in a root shell!" && echo "type 'su' then '$_name'" && exit 1
+id | grep -q root
+[ $? -ne 0 ] && { echo "$ID needs to be in a root shell!"; echo "type 'su' then '$_name'"; exit 1; }
 
 #=========================== Set Log Files
 mount -o remount,rw /cache 2>/dev/null
 mount -o rw,remount /cache 2>/dev/null
 # > Logs should go in this file
 LOG=/cache/${ID}.log
+oldLOG=/cache/${ID}-old.log
 # > Verbose output goes here
 VERLOG=/cache/${ID}-verbose.log
+oldVERLOG=/cache/${ID}-verbose-old.log
 
 #=========================== Start Logging verbosely
+mv -f $VERLOG $oldVERLOG 2>/dev/null; mv -f $LOG $oldLOG 2>/dev/null
 set -x 2>$VERLOG
 
 #=========================== Determine if A/B OTA device
-#ABDeviceCheck=$(cat /proc/cmdline | grep slot_suffix | wc -l)
 if [ -d /system_root ]; then
   isABDevice=true
   SYSTEM=/system_root/system
@@ -60,13 +62,9 @@ if [ ! -x $SYSTEM/xbin/busybox ]; then
   fi
 fi
 if [ -x $SYSTEM/xbin/busybox ]; then
-  true
   _bb=$SYSTEM/xbin/busybox
 elif [ -x $SYSTEM/bin/busybox ]; then
-  true
   _bb=$SYSTEM/bin/busybox
-elif [ -x /data/data/com.topjohnwu.magisk/busybox/busybox ]; then
-  export PATH=$PATH:/data/data/com.topjohnwu.magisk/busybox
 elif [ $_busybox ]; then
   true
 else
@@ -77,8 +75,10 @@ fi
 [ $? -ne 0 ] && exit $?
 _bbname=$(busybox | head -n1)
 _bbname=${_bbname%'('*}
+BBok=true
 if [ "$_bbname" == "" ]; then
   _bbname="BusyBox not found!"
+  BBok=false
 fi
 
 #=========================== Default Functions
@@ -105,6 +105,38 @@ printf "\rProgress : [${_done// /=}${_left// / }] ${_progress}%%"
 
 }
 
+# "cmd & spinner [message]"
+spinner() {
+  PID=$!
+  h=0; anim='-\|/'; 
+  while [ -d /proc/$PID ]; do
+	h=$(((h+1)%4))
+	printf "\r$@ [${anim:$h:1}]"
+  done
+}
+
+# Log files will be uploaded to termbin.com
+upload_logs() {
+  $BBok && {
+    echo -n "Testing internet connection "
+    ping -q -c 1 -W 1 google.com >/dev/null 2>/dev/null && echo "- OK" || { echo "Error"; exit 1; }
+	verUp=none; oldverUp=none; logUp=none; oldlogUp=none;
+	echo "Uploading logs"
+	[ -s $VERLOG ] && verUp=$(cat $VERLOG | nc termbin.com 9999)
+    [ -s $oldVERLOG ] && oldverUp=$(cat $oldVERLOG | nc termbin.com 9999)
+    [ -s $LOG ] && logUp=$(cat $LOG | nc termbin.com 9999)
+    [ -s $oldLOG ] && oldlogUp=$(cat $oldLOG | nc termbin.com 9999)
+	echo -n "Link: "
+	echo "$MODEL ($DEVICE) API $API\n$ROM\n$ID\n
+	O_Verbose: $oldverUp
+	Verbose:   $verUp
+	
+	O_Log: $oldlogUp
+	Log:   $logUp" | nc termbin.com 9999
+  } || echo "Busybox not found!"
+  exit
+}
+
 #=========================== Default Variables
 # > Stuff here is used for some other stuff
 # > Edit only if necessary!
@@ -129,6 +161,14 @@ fi
 # Import util_functions.sh
 [ -f /data/adb/magisk/util_functions.sh ] && . /data/adb/magisk/util_functions.sh || exit 1
 
+# Device Info
+# BRAND MODEL DEVICE API ABI ABI2 ABILONG ARCH
+BRAND=$(getprop ro.product.brand)
+MODEL=$(getprop ro.product.model)
+DEVICE=$(getprop ro.product.device)
+ROM=$(getprop ro.build.display.id)
+api_level_arch_detect
+
 # Version Number
 VER=$(grep_prop version $MODDIR/module.prop)
 # Version Code
@@ -151,36 +191,28 @@ N='\e[00;37;40m' # How to use (example): echo "${G}example${N}"
 
 # Remove colors if -nc
 [ "$1" == "-nc" ] && {
-  G=''
-  R=''
-  Y=''
-  B=''
-  V=''
-  Bl=''
-  C=''
-  W=''
-  N=''
+  G=''; R=''; Y=''; B=''; V=''; Bl=''; C=''; W=''; N=''
 }
 
 # Divider (based on $MODTITLE, $VER, and $REL characters)
-div="${Bl}$(printf '%*s' "$(($(echo $MODTITLE | wc -c)+$(echo $VER | wc -c)+$(echo $REL | wc -c)))" '' | tr " " '=')${N}"
+div="${Bl}$(printf '%*s' "$(echo $MODTITLE $VER $REL | tr " " '_' | wc -c)" '' | tr " " '=')${N}"
+
+# Heading
+head() {
+  clear
+  echo "$div"
+  echo "${W}$MODTITLE $VER${N}${Bl}($REL)${N}"
+  echo "by ${W}$AUTHOR${N}"
+  echo "$div"
+  echo "${W}$_bbname${N}"
+  echo "${Bl}$_bb${N}"
+  echo "$div"
+}
 
 #=========================== Main
 # > You can start your MOD here.
 # > You can add functions, variables & etc.
 # > Rather than editing the default vars above.
-
-
-# Terminal Debloater
-# by veez21
-clear
-echo "$div"
-echo "${W}$MODTITLE $VER${N}${Bl}($REL)${N}"
-echo "by ${W}$AUTHOR${N}"
-echo "$div"
-echo "${W}$_bbname${N}"
-echo "${Bl}$_bb${N}"
-echo "$div"
 
 show_rein=0
 if [ -d $MODDIR$SYSTEM2/app ]; then
@@ -301,22 +333,7 @@ export_list() {
   done
 }
 
-echo ""
-[ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
-[ -d $SYSTEM/priv-app ] && echo " 2 - ${W}System Priv-Apps${N}"
-[ $show_rein == 1 ] && {
-  echo " 3 - ${W}Reinstall Uninstalled Apps${N}"
-  echo " e - ${W}Export Config${N}"
-}
-[ -f $import_file ] && echo " i - ${W}Import Condig ($import_file)"
-
-echo " d - ${C}Donate${N}"
-echo " 0 - ${Bl}Exit${N}"
-echo ""
-echo -n "[CHOICE]: "
-read choice
-if [ "$choice" == "1" ]; then
-  if [ -d $SYSTEM/app ]; then
+menu_list_system_app() {
     clear
     list_system_app 2>>$LOG
     clear
@@ -331,12 +348,14 @@ if [ "$choice" == "1" ]; then
     done
     echo ""
 	echo " ${Bl}To uninstall multiple apps, enter multiple number. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
+	echo " x - ${Bl}Back to Menu${N}"
     echo " 0 - ${Bl}Exit${N}"
     echo "$div"
     echo -n "[CHOICE]: "
     read app
+	[ "$app" == "x" ] && menu
 	for i in $app; do
-	  if [ "$i" -gt ${#app[@]} ] || [ "$i" -lt 0 ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+	  if [ "$i" -gt "${#app[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
 	    echo "$i - Invalid"; false
       elif [ "$i" == "0" ]; then
         exit
@@ -346,20 +365,19 @@ if [ "$choice" == "1" ]; then
         mktouch $MODDIR${app[$i]}/.replace ${app_name[$i]}
         if [ "${app_label[$i]}" ]; then
           data_apkdir=$(echo /data/app/${app_label[$i]}-*)
-          if [ -d ${data_apkdir} ]; then
+          if [ -d "${data_apkdir}" ]; then
             rm -rf ${data_apkdir} 2>/dev/null
           fi
         fi
 	  fi
 	done
     echo "Reboot to apply changes"
-    exit $?
-  else
-    echo Invalid
-    exit 1
-  fi
-elif [ "$choice" == 2 ]; then
-  if [ -d $SYSTEM/priv-app ]; then
+	echo -n "Return to menu? < y | n >: "
+	read mchoice
+	[ "$mchoice" == "y" ] && menu || exit
+}
+
+menu_list_system_priv-app() {
     clear
     list_system_priv-app 2>>$LOG
     clear
@@ -374,12 +392,14 @@ elif [ "$choice" == 2 ]; then
     done
     echo ""
 	echo " ${Bl}To uninstall multiple apps, enter multiple number. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
+	echo " x - ${Bl}Back to Menu${N}"
     echo " 0 - ${Bl}Exit${N}"
     echo "$div"
     echo -n "[CHOICE]: "
     read privapp
+	[ "$privapp" == "x" ] && menu
 	for i in $privapp; do
-	  if [ "$i" -gt ${#privapp[@]} ] || [ "$i" -lt 0 ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+	  if [ "$i" -gt "${#privapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
 	    echo "$i - Invalid"; false
       elif [ "$i" == "0" ]; then
         exit
@@ -389,80 +409,128 @@ elif [ "$choice" == 2 ]; then
         mktouch $MODDIR${privapp[$i]}/.replace ${app_name[$i]}
         if [ "${app_label[$i]}" ]; then
           data_apkdir=$(echo /data/app/${app_label[$i]}-*)
-          if [ -d ${data_apkdir} ]; then
+          if [ -d "${data_apkdir}" ]; then
             rm -rf ${data_apkdir} 2>/dev/null
           fi
         fi
 	  fi
 	done
-  else
-    echo Invalid
-    exit 1
-  fi
-elif [ "$choice" == 3 ]; then
-  if [ $show_rein == 1 ]; then
-    clear
-    echo "$div"
-    echo "${W}Reinstall${N}"
-	echo " You can also just delete your selected
+    echo "Reboot to apply changes"
+	echo -n "Return to menu? < y | n >: "
+	read mchoice
+	[ "$mchoice" == "y" ] && menu || exit
+}
+
+menu_list_unin_app() {
+  clear
+  echo "$div"
+  echo "${W}Reinstall${N}"
+  echo " You can also just delete your selected
  folders in $MODDIR$SYSTEM2/app or priv-app."    
-	echo " The apps debloated were reset
+  echo " The apps debloated were reset
  to their factory version."
-    echo "$div"
-    echo ""
-    list_unin_app
-    echo " 0 - ${Bl}Exit${N}"
-    echo ""
-    echo -n "[CHOICE]: "
-    read rein
-    if [ "$rein" -gt ${#name_unin[@]} ] || [ "$rein" -lt 0 ] || [ "$rein" == "" ] || [ -n "$(echo $rein | tr -d '0-9')" ] ; then
+  echo "$div"
+  echo ""
+  list_unin_app
+  echo ""
+  echo " ${Bl}To reinstall multiple apps, enter multiple number. Example:${N} \"1 $(echo ${#name_unin[$((${#name_unin[@]}/3))]}) $(echo ${#name_unin[$((${#name_unin[@]}/2))]})\""
+  echo " x - ${Bl}Back to Menu${N}"
+  echo " 0 - ${Bl}Exit${N}"
+  echo ""
+  echo -n "[CHOICE]: "
+  read rein
+  [ "$rein" == "x" ] && menu
+  for i in $rein; do
+    if [ "$i" -gt ${#name_unin[@]} ] || [ "$i" -lt 0 ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
       echo "Invalid"
       exit 1
-    elif [ "$rein" == "0" ]; then
+    elif [ "$i" == "0" ]; then
       exit
     else
-      echo "Reinstalling ${G}${name_unin[$rein]}${N}" | tr '_' ' '
+      echo "Reinstalling ${G}${name_unin[$i]}${N}" | tr '_' ' '
       sleep 1
-      rm -rf ${unin_app[$rein]}
-      echo "Reboot to apply changes"
-      exit
+      rm -rf ${unin_app[$i]}
     fi
-  else
-    echo "Invalid"
+  done
+  echo "Reboot to apply changes"
+  echo -n "Return to menu? < y | n >: "
+  read mchoice
+  [ "$mchoice" == "y" ] && menu || exit
+}
+
+menu() {
+  head
+  echo ""
+  [ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
+  [ -d $SYSTEM/priv-app ] && echo " 2 - ${W}System Priv-Apps${N}"
+  [ $show_rein == 1 ] && {
+    echo " 3 - ${W}Reinstall Uninstalled Apps${N}"
+	echo " e - ${W}Export Config${N}"
+  }
+  [ -f $import_file ] && echo " i - ${W}Import Config ($import_file)"
+
+  echo " d - ${C}Donate${N}"
+  echo " 0 - ${Bl}Exit${N}"
+  echo ""
+  echo -n "[CHOICE]: "
+  read choice
+  if [ "$choice" == "1" ]; then
+    if [ -d $SYSTEM/app ]; then
+	  menu_list_system_app
+	else
+	  echo Invalid
+	  exit 1
+	fi
+  elif [ "$choice" == 2 ]; then
+    if [ -d $SYSTEM/priv-app ]; then
+	  menu_list_system_priv-app
+	else
+	  echo Invalid
+	  exit 1
+	fi
+  elif [ "$choice" == 3 ]; then
+    if [ $show_rein == 1 ]; then
+	  menu_list_unin_app
+    else
+      echo "Invalid"
+      exit 1
+    fi
+  elif [ "$choice" == "e" ]; then
+    if [ $show_rein == 1 ]; then
+      clear
+	  echo "Exporting to ${W}$import_file...${N}"
+	  sleep 0.4
+	  clear
+	  export_list
+	  echo "Done"
+	  exit
+    else
+      echo "Invalid"
+	  exit 1
+    fi
+  elif [ "$choice" == "i" ]; then
+    if [ -f $import_file ]; then
+      clear
+	  echo "Importing from ${W}$import_file...${N}"
+	  sleep 0.4
+	  import_list
+	  echo "Done"
+	  exit
+    else
+      echo "Invalid"
+	  exit 1
+    fi
+
+  elif [ "$choice" == "d" ] || [ "$choice" == "D" ]; then
+    am start https://paypal.me/veez21 >/dev/null
+  elif [ "$choice" == "logs" ]; then
+    upload_logs
+  elif [ "$choice" == "0" ]; then
+    exit 
+  else echo Invalid
     exit 1
   fi
-elif [ "$choice" == "e" ]; then
-  if [ $show_rein == 1 ]; then
-    clear
-	echo "Exporting to ${W}$import_file...${N}"
-	sleep 0.4
-	clear
-	export_list
-	echo "Done"
-	exit
-  else
-    echo "Invalid"
-	exit 1
-  fi
-elif [ "$choice" == "i" ]; then
-  if [ -f $import_file ]; then
-    clear
-	echo "Importing from ${W}$import_file...${N}"
-	sleep 0.4
-	import_list
-	echo "Done"
-	exit
-  else
-    echo "Invalid"
-	exit 1
-  fi
+}
 
-elif [ "$choice" == "d" ] || [ "$choice" == "D" ]; then
-  am start https://paypal.me/veez21 >/dev/null
-elif [ "$choice" == "0" ]; then
-  exit 
-else echo Invalid
-  exit 1
-fi
-
+menu
 exit $?

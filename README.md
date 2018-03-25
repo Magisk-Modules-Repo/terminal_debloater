@@ -7,14 +7,19 @@
 
 	debloat
 	
- And you will be presented with a list of app names inside /system.
+ And you will be presented with a list of apps inside /system.
  Just reboot and you will have it removed, systemless-ly
  
 ## Error?
- Send `/cache/terminal_debloater-verbose.log` in the XDA thread. I'll examine it for problems and will try to fix it.
+ Go to the menu and type `logs`, this will upload the log files of this module and will generate a link. Send that :)
+ Alternatively, Send `/cache/terminal_debloater-verbose.log` in the XDA thread. I'll examine it for problems and will try to fix it.
 
 ## Changelog
 
+### v11
+* Add Back to menu option
+* Logs can now be uploaded by entering `logs`
+* Misc improvements XD
 ### v10
 * New way of debloating
 * Made debloating multiple apps easier (read the XDA Thread for instructions)
