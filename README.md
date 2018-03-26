@@ -16,17 +16,9 @@
 
 ## Changelog
 
+### v11.1
+* Fixed stuff related to busybox alias
 ### v11
 * Add Back to menu option
 * Logs can now be uploaded by entering `logs`
 * Misc improvements XD
-### v10
-* New way of debloating
-* Made debloating multiple apps easier (read the XDA Thread for instructions)
-* Fix xbin not getting deleted
-### v9
-* Fixed typos
-### v8.9
-* Add Import and export options
-### v8.8
-* Fix problems on A/B devices
