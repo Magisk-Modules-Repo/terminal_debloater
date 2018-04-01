@@ -18,6 +18,7 @@
 
 ### v11.2
 * Add vendor apps
+* Add option on deleting the apk in /data
 * other changes
 ### v11.1
 * Fixed stuff related to busybox alias
