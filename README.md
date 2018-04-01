@@ -16,6 +16,9 @@
 
 ## Changelog
 
+### v11.2
+* Add vendor apps
+* other changes
 ### v11.1
 * Fixed stuff related to busybox alias
 ### v11
