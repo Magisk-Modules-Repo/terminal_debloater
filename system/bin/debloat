@@ -111,6 +111,7 @@ spinner() {
   h=0; anim='-\|/'; 
   while [ -d /proc/$PID ]; do
 	h=$(((h+1)%4))
+	sleep 0.02
 	printf "\r$@ [${anim:$h:1}]"
   done
 }
@@ -612,7 +613,7 @@ menu() {
   elif [ "$choice" == "logs" ]; then
     upload_logs
   elif [ "$choice" == "0" ]; then
-    exit 
+    exit
   else echo Invalid
     exit 1
   fi
