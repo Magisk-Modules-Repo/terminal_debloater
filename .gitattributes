@@ -5,5 +5,4 @@ META-INF/** text eol=lf
 *.md text eol=lf
 
 # Denote all files that are truly binary and should not be modified.
-#system/** binary
-system/bin/debloat eol=lf
+system/** binary
