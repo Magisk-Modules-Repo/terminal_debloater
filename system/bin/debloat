@@ -335,6 +335,9 @@ import_list() {
 	  c=$((c+1))
 	done
   fi
+  echo -n "Return to menu? < y | n >: "
+  read mchoice
+  [ "$mchoice" == "y" ] && menu || exit
 }
 
 export_list() {
@@ -343,6 +346,9 @@ export_list() {
     echo ${i%/*} >> $import_file
 	echo "$(cat $i) - Exported"
   done
+  echo -n "Return to menu? < y | n >: "
+  read mchoice
+  [ "$mchoice" == "y" ] && menu || exit
 }
 
 menu_list_system_app() {
