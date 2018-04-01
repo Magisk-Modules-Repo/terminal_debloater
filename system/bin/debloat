@@ -396,6 +396,7 @@ menu_list_system_app() {
     echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
+	unset $(for i in ${!app_name[@]}; do echo "app_name[$i]"; done)
 	[ "$mchoice" == "y" ] && menu || exit
 }
 
@@ -444,6 +445,7 @@ menu_list_system_priv-app() {
     echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
+	unset $(for i in ${!app_name[@]}; do echo "app_name[$i]"; done)
 	[ "$mchoice" == "y" ] && menu || exit
 }
 
@@ -492,6 +494,7 @@ menu_list_vendor_app() {
     echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
+	unset $(for i in ${!app_name[@]}; do echo "app_name[$i]"; done)
 	[ "$mchoice" == "y" ] && menu || exit
 }
 
@@ -529,6 +532,7 @@ menu_list_unin_app() {
   echo "Reboot to apply changes"
   echo -n "Return to menu? < y | n >: "
   read mchoice
+  unset $(for i in ${!name_unin[@]}; do echo "name_unin[$i]"; done)
   [ "$mchoice" == "y" ] && menu || exit
 }
 
