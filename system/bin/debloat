@@ -50,16 +50,16 @@ set_busybox() {
     _bb=$1
   fi
 }
-if [ ! -x $SYSTEM/xbin/busybox ]; then
-  _busybox=false
+_busybox=false
+if [ -d /sbin/.core/busybox ]; then
+  PATH=$PATH:/sbin/.core/busybox
+  _bb=/sbin/.core/busybox/busybox
+  _busybox=true
+elif [ ! -x $SYSTEM/xbin/busybox ]; then
   set_busybox /data/magisk/busybox
   set_busybox /data/adb/magisk/busybox
-  if [ -d /sbin/.core/busybox ]; then
-    PATH=$PATH:/sbin/.core/busybox
-    _busybox=true
-  else
-    alias busybox=""
-  fi
+else
+  alias busybox=""
 fi
 if [ -x $SYSTEM/xbin/busybox ]; then
   _bb=$SYSTEM/xbin/busybox
@@ -255,8 +255,7 @@ get_app_name() {
 }
 
 list_system_app() {
-  c=1
-  x=1
+  c=1; x=1
   system_apps=($(ls $SYSTEM/app))
   for i in $(ls $SYSTEM/app); do
     app[$x]=$SYSTEM2/app/$i
@@ -270,8 +269,7 @@ list_system_app() {
 }
 
 list_system_priv-app() {
-  c=1
-  x=1
+  c=1; x=1
   system_privapp=($(ls $SYSTEM/priv-app))
   for i in $(ls $SYSTEM/priv-app); do
     privapp[$x]=$SYSTEM2/priv-app/$i
@@ -279,6 +277,20 @@ list_system_priv-app() {
     if [ ! -d $MODDIR${privapp[$x]} ]; then
       name[$x]=${i%/*}
       get_app_name ${privapp[$x]} $x
+      c=$((c+1));x=$((x+1))
+    fi
+  done
+}
+
+list_vendor_app() {
+  c=1; x=1
+  venapp=($(ls $SYSTEM/vendor/app))
+  for i in $(ls $SYSTEM/vendor/app); do
+    venapp[$x]=$SYSTEM2/vendor/app/$i
+    ProgressBar $c ${#venapp[@]}
+    if [ ! -d $MODDIR${venapp[$x]} ]; then
+      name[$x]=${i%/*}
+      get_app_name ${venapp[$x]} $x
       c=$((c+1));x=$((x+1))
     fi
   done
@@ -364,11 +376,15 @@ menu_list_system_app() {
         sleep 1
         mktouch $MODDIR${app[$i]}/.replace ${app_name[$i]}
         if [ "${app_label[$i]}" ]; then
-          data_apkdir=$(echo /data/app/${app_label[$i]}-*)
-          if [ -d "${data_apkdir}" ]; then
-            rm -rf ${data_apkdir} 2>/dev/null
-          fi
-        fi
+		  echo -n " - APK stored in /data, delete? < y | n > " 
+		  read del_apk; [ "$del_apk" == "y" ] && {
+            data_apkdir=$(echo /data/app/${app_label[$i]}-*)
+            if [ -d "${data_apkdir}" ]; then
+              rm -rf ${data_apkdir} 2>/dev/null
+			  echo " - deleted"
+            fi
+		  } || echo " - not deleted"
+       fi
 	  fi
 	done
     echo "Reboot to apply changes"
@@ -408,10 +424,62 @@ menu_list_system_priv-app() {
         sleep 1
         mktouch $MODDIR${privapp[$i]}/.replace ${app_name[$i]}
         if [ "${app_label[$i]}" ]; then
-          data_apkdir=$(echo /data/app/${app_label[$i]}-*)
-          if [ -d "${data_apkdir}" ]; then
-            rm -rf ${data_apkdir} 2>/dev/null
-          fi
+		  echo -n " - APK stored in /data, delete? < y | n > " 
+		  read del_apk; [ "$del_apk" == "y" ] && {
+            data_apkdir=$(echo /data/app/${app_label[$i]}-*)
+            if [ -d "${data_apkdir}" ]; then
+              rm -rf ${data_apkdir} 2>/dev/null
+			  echo " - deleted"
+            fi
+		  } || echo " - not deleted"
+        fi
+	  fi
+	done
+    echo "Reboot to apply changes"
+	echo -n "Return to menu? < y | n >: "
+	read mchoice
+	[ "$mchoice" == "y" ] && menu || exit
+}
+
+menu_list_vendor_app() {
+    clear
+    list_vendor_app 2>>$LOG
+    clear
+    echo "$div"
+    echo "${W}Vendor Apps${N}"
+    echo "$div"
+    echo ""
+    c=1
+    for i in $(seq 1 $((${#app_name[@]}-1))); do
+      echo " $c - $(echo ${W}${app_name[$i]}${N} | tr '_' ' ')"
+      c=$((c+1))
+    done
+    echo ""
+	echo " ${Bl}To uninstall multiple apps, enter multiple number. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
+	echo " x - ${Bl}Back to Menu${N}"
+    echo " 0 - ${Bl}Exit${N}"
+    echo "$div"
+    echo -n "[CHOICE]: "
+    read vapp
+	[ "$vapp" == "x" ] && menu
+	for i in $app; do
+	  if [ "$i" -gt "${#vapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+	    echo "$i - Invalid"; false
+      elif [ "$i" == "0" ]; then
+        exit
+	  else
+        echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
+        sleep 1
+        mktouch $MODDIR${venapp[$i]}/.replace ${app_name[$i]}
+        if [ "${app_label[$i]}" ]; then
+		  echo -n " - APK stored in /data, delete? < y | n > " 
+		  read del_apk; [ "$del_apk" == "y" ] && {
+            data_apkdir=$(echo /data/app/${app_label[$i]}-*)
+            if [ -d "${data_apkdir}" ]; then
+              rm -rf ${data_apkdir} 2>/dev/null
+			  echo " - deleted"
+            fi
+		  } || echo " - not deleted"
         fi
 	  fi
 	done
@@ -463,8 +531,9 @@ menu() {
   echo ""
   [ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
   [ -d $SYSTEM/priv-app ] && echo " 2 - ${W}System Priv-Apps${N}"
+  [ -d $SYSTEM/vendor/app ] && echo " 3 - ${W}Vendor Apps${N}"
   [ $show_rein == 1 ] && {
-    echo " 3 - ${W}Reinstall Uninstalled Apps${N}"
+    echo " 4 - ${W}Reinstall Uninstalled Apps${N}"
 	echo " e - ${W}Export Config${N}"
   }
   [ -f $import_file ] && echo " i - ${W}Import Config ($import_file)"
@@ -489,6 +558,13 @@ menu() {
 	  exit 1
 	fi
   elif [ "$choice" == 3 ]; then
+    if [ -d $SYSTEM/vendor/app ]; then
+	  menu_list_vendor_app
+	else
+	  echo Invalid
+	  exit 1
+	fi
+  elif [ "$choice" == 4 ]; then
     if [ $show_rein == 1 ]; then
 	  menu_list_unin_app
     else
