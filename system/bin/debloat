@@ -192,7 +192,7 @@ N='\e[00;37;40m' # How to use (example): echo "${G}example${N}"
 
 # Remove colors if -nc
 [ "$1" == "-nc" ] && {
-  G=''; R=''; Y=''; B=''; V=''; Bl=''; C=''; W=''; N=''
+  G=''; R=''; Y=''; B=''; V=''; Bl=''; C=''; W=''; N=''; shift;
 }
 
 # Divider (based on $MODTITLE, $VER, and $REL characters)
