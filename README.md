@@ -16,6 +16,9 @@
 
 ## Changelog
 
+### v11.3
+* Fix listing when going back and forth in the menu
+* Misc
 ### v11.2
 * Add vendor apps
 * Add option on deleting the apk in /data
