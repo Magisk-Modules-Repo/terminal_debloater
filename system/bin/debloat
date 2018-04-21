@@ -397,7 +397,7 @@ menu_list_system_app() {
 	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
-	unset $(for i in ${!app_name[@]}; do echo "app_name[$i]"; done)
+	app_name=()
 	[ "$mchoice" == "y" ] && menu || exit
 }
 
@@ -446,7 +446,7 @@ menu_list_system_priv-app() {
 	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
-	unset $(for i in ${!app_name[@]}; do echo "app_name[$i]"; done)
+	app_name=()
 	[ "$mchoice" == "y" ] && menu || exit
 }
 
@@ -495,7 +495,7 @@ menu_list_vendor_app() {
 	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
-	unset $(for i in ${!app_name[@]}; do echo "app_name[$i]"; done)
+	app_name=()
 	[ "$mchoice" == "y" ] && menu || exit
 }
 
@@ -532,7 +532,7 @@ menu_list_unin_app() {
 	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
-	unset $(for i in ${!name_unin[@]}; do echo "name_unin[$i]"; done)
+	app_name=()
 	[ "$mchoice" == "y" ] && menu || exit
 }
 
@@ -597,10 +597,10 @@ menu() {
 			echo "Done"
 			exit
 		else
-		abort "Invalid"
+			abort "Invalid"
 		fi
 
-	elif [ "$choice" == "d" ] || [ "$choice" == "D" ]; then
+	elif [ "$choice" == "d" -o "$choice" == "D" ]; then
 		am start https://paypal.me/veez21 >/dev/null
 	elif [ "$choice" == "logs" ]; then
 		upload_logs
