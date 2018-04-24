@@ -179,15 +179,15 @@ AUTHOR=$(grep_prop author $MODDIR/module.prop)
 MODTITLE=$(grep_prop name $MODDIR/module.prop)
 
 # Colors
-G='\e[01;32m'    # GREEN
-R='\e[01;31m'    # RED
-Y='\e[01;33m'    # YELLOW
-B='\e[01;34m'    # BLUE
-V='\e[01;35m'    # VIOLET
-Bl='\e[01;30m'   # BLACK
-C='\e[01;36m'    # CYAN
-W='\e[01;37m'    # WHITE
-N='\e[00;37;40m' # How to use (example): echo "${G}example${N}"
+G='\033[0;32m'    # GREEN
+R='\033[0;31m'    # RED
+Y='\033[1;33m'    # YELLOW
+B='\033[0;34m'    # BLUE
+V='\033[0;35m'    # PURPLE
+Bl='\033[0;30m'   # BLACK
+C='\033[0;36m'    # CYAN
+W='\033[1;37m'    # WHITE
+N='\033[0m' # How to use (example): echo "${G}example${N}"
 
 # Remove colors if -nc or in ADB Shell
 [ -n "$1" -a "$1" == "-nc" ] && shift && NC=true
@@ -202,11 +202,11 @@ div="${Bl}$(printf '%*s' "$(echo $MODTITLE $VER $REL | tr " " '_' | wc -c)" '' |
 mod_head() {
 	clear
 	echo "$div"
-	echo "${W}$MODTITLE $VER${N}${Bl}($REL)${N}"
+	echo "${W}$MODTITLE $VER${N}(${R}$REL${N})"
 	echo "by ${W}$AUTHOR${N}"
 	echo "$div"
 	echo "${W}$_bbname${N}"
-	echo "${Bl}$_bb${N}"
+	echo "${G}$_bb${N}"
 	echo "$div"
 }
 
@@ -215,18 +215,36 @@ mod_head() {
 # > You can add functions, variables & etc.
 # > Rather than editing the default vars above.
 
-show_rein=0
+help_me() {
+	cat << EOF
+$MODTITLE $VER($REL)
+by $AUTHOR
+	
+Usage: $_name
+   or: $_name [options]...
+   
+Options:
+    -nc                        removes ANSI escape codes
+    -l [app|priv-app|vendor]   list system apps
+    -i [file]                  import config from file
+    -e [file]                  export current settings
+    -h                         show this message
+EOF
+exit
+}
+
+show_rein=false
 if [ -d $MODDIR$SYSTEM2/app ]; then
 	for i in $MODDIR$SYSTEM2/app/*; do
 		if [ -f $i/.replace ]; then
-			show_rein=1
+			show_rein=true
 			break
 		fi
 	done
 elif [ -d $MODDIR$SYSTEM2/priv-app ]; then
 	for i in $MODDIR$SYSTEM2/priv-app/*; do
 		if [ -f $i/.replace ]; then
-			show_rein=1
+			show_rein=true
 			break
 		fi
 	done
@@ -324,7 +342,8 @@ list_unin_app() {
 }
 
 import_list() {
-	if [ -f $import_file ]; then
+	[ "$1" ] && import_file=$1
+	if [ -f $import_file ] && (grep -q "$MODDIR" $import_file); then
 		c=1
 		import_apps=($(cat $import_file))
 		for i in ${import_apps[@]}; do
@@ -335,21 +354,18 @@ import_list() {
 			echo "${W}${app_name[$c]}${N} - Imported"
 			c=$((c+1))
 		done
+	else
+		echo "Invalid file"
 	fi
-	echo -n "Return to menu? < y | n >: "
-	read mchoice
-	[ "$mchoice" == "y" ] && menu || exit
 }
 
 export_list() {
-	echo "" > $import_file
-	for i in $(find $MODDIR/system -name ".replace"); do
+	[ "$1" ] && import_file=$1
+	mktouch $import_file
+	for i in $(find $MODDIR/system -name ".replace" -type f); do
 		echo ${i%/*} >> $import_file
 		echo "$(cat $i) - Exported"
 	done
-	echo -n "Return to menu? < y | n >: "
-	read mchoice
-	[ "$mchoice" == "y" ] && menu || exit
 }
 
 menu_list_system_app() {
@@ -542,7 +558,7 @@ menu() {
 	[ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
 	[ -d $SYSTEM/priv-app ] && echo " 2 - ${W}System Priv-Apps${N}"
 	[ -d $SYSTEM/vendor/app ] && echo " 3 - ${W}Vendor Apps${N}"
-	[ $show_rein == 1 ] && {
+	$show_rein && {
 		echo " 4 - ${W}Reinstall Uninstalled Apps${N}"
 		echo " e - ${W}Export Config${N}"
 	}
@@ -571,20 +587,22 @@ menu() {
 			abort Invalid
 		fi
 	elif [ "$choice" == 4 ]; then
-		if [ $show_rein == 1 ]; then
+		if $show_rein; then
 			menu_list_unin_app
 		else
 			abort "Invalid"
 		fi
 	elif [ "$choice" == "e" ]; then
-		if [ $show_rein == 1 ]; then
+		if $show_rein; then
 			clear
 			echo "Exporting to ${W}$import_file...${N}"
 			sleep 0.4
 			clear
 			export_list
 			echo "Done"
-			exit
+			echo -n "Return to menu? < y | n >: "
+			read mchoice
+			[ "$mchoice" == "y" ] && menu || exit
 		else
 			abort "Invalid"
 		fi
@@ -595,7 +613,9 @@ menu() {
 			sleep 0.4
 			import_list
 			echo "Done"
-			exit
+			echo -n "Return to menu? < y | n >: "
+			read mchoice
+			[ "$mchoice" == "y" ] && menu || exit
 		else
 			abort "Invalid"
 		fi
@@ -609,6 +629,30 @@ menu() {
 	else abort Invalid
 	fi
 }
+
+case "$1" in
+	-i) shift
+		[ -s "$1" ] && { import_list $1; exit; } || abort "Invalid file!";;
+	-e) shift
+		[ -f "$1" ] && abort "File exists!" || { export_list "$1"; exit; };;
+	-l) shift
+		[ ! "$1" ] && abort "$(help_me)"
+		if [ "$1" == "app" ]; then
+			list_system_app
+		elif [ "$1" == "priv-app" ]; then
+			list_system_priv-app
+		elif [ "$1" == "vendor" ]; then
+			list_vendor_app
+		else
+			abort "$(help_me)"
+		fi
+		c=1
+		for i in $(seq 1 $((${#app_name[@]}-1))); do
+			echo "$(echo ${app_name[$i]} | tr '_' ' ') - ${app_label[$i]} - ${{app[$i]}#*system}"
+			c=$((c+1))
+		done; exit;;
+	-h) help_me;;
+esac
 
 menu
 exit $?
