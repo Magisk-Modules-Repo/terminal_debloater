@@ -681,7 +681,7 @@ case "$1" in
 		done
 		exit;;
 	-h|--help) help_me;;
-	*) help_me;;
+	
 esac
 
 menu
