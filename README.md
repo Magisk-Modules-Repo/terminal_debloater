@@ -16,6 +16,9 @@
 
 ## Changelog
 
+### v12
+* Add options w/o menu (try: debloat -h)
+* Fixes and optimizations (ala google XD)
 ### v11.3
 * Fix listing when going back and forth in the menu
 * Misc
