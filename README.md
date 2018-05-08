@@ -16,6 +16,8 @@
 
 ## Changelog
 
+### v13
+* debloat -d now supports app label (e.g. com.android.terminal)
 ### v12
 * Add options w/o menu (try: debloat -h)
 * Fixes and optimizations (ala google XD)
