@@ -91,7 +91,6 @@ set_file_prop() {
 }
 
 # https://github.com/fearside/ProgressBar
-loadBar=' '
 ProgressBar() {
 # Process data
 	_progress=$(((${1}*100/${2}*100)/100))
@@ -192,6 +191,7 @@ C='\e[01;36m'		# CYAN TEXT
 W='\e[01;37m'		# WHITE TEXT
 BGBL='\e[1;30;47m'	# Background W Text Bl
 N='\e[0m'			# How to use (example): echo "${G}example${N}"
+loadBar=' '			# Load UI
 # Remove colors if -nc or in ADB Shell
 [ -n "$1" -a "$1" == "-nc" ] && shift && NC=true
 [ "$NC" -o -n "$LOGNAME" ] && {
@@ -199,7 +199,7 @@ N='\e[0m'			# How to use (example): echo "${G}example${N}"
 }
 
 # Divider (based on $MODTITLE, $VER, and $REL characters)
-div="${Bl}$(printf '%*s' "$(echo $MODTITLE $VER $REL | tr " " '_' | wc -c)" '' | tr " " '=')${N}"
+div="${BGBL}$(printf '%*s' "$(echo $MODTITLE $VER $REL | tr " " '_' | wc -c)" '' | tr " " "=")${N}"
 
 # Heading
 mod_head() {
@@ -255,13 +255,13 @@ elif [ -d $MODDIR$SYSTEM2/priv-app ]; then
 	done
 fi
 
-use_aapt=0
-[[ "$(which aapt)" ]] && let use_aapt=1
+use_aapt=false
+[[ "$(which aapt)" ]] && let use_aapt=true
 export PATH=$MODDIR:$PATH
 import_file=/cache/import-debloat.txt
 
 get_app_name() {
-	if [ -x $MODDIR/aapt ] || [ -x $SYSTEM/bin/aapt ] || [ -x $SYSTEM/xbin/aapt ] || [ $use_aapt == 1 ]; then
+	if [ -x $MODDIR/aapt ] || [ -x $SYSTEM/bin/aapt ] || [ -x $SYSTEM/xbin/aapt ] || [ $use_aapt ]; then
 		app_name=$(aapt dump badging $1/${name[$2]}.apk 2>$LOG | grep 'application-label:' 2>/dev/null)
 		if [ $? -gt 0 ]; then
 			app_name[$2]=${name[$2]}
@@ -278,43 +278,17 @@ get_app_name() {
 	fi
 }
 
-list_system_app() {
+list_s-app() {
+	app_name=(); listapp=()
 	x=1
-	system_apps=($(ls $SYSTEM/app))
-	for i in $(ls $SYSTEM/app); do
-		app[$x]=$SYSTEM2/app/$i
-		ProgressBar $x ${#system_apps[@]}
-		if [ ! -d $MODDIR${app[$x]} ]; then
+	type=$1
+	sapp=($(ls $SYSTEM/$type))
+	for i in $(ls $SYSTEM/$type); do
+		listapp[$x]=$SYSTEM2/$type/$i
+		ProgressBar $x ${#sapp[@]}
+		if [[ ! -d $MODDIR${sapp[$x]} ]]; then
 			name[$x]=${i%/*}
-			get_app_name ${app[$x]} $x
-			x=$((x+1))
-		fi
-	done
-}
-
-list_system_priv-app() {
-	x=1
-	system_privapp=($(ls $SYSTEM/priv-app))
-	for i in $(ls $SYSTEM/priv-app); do
-		privapp[$x]=$SYSTEM2/priv-app/$i
-		ProgressBar $x ${#system_privapp[@]}
-		if [ ! -d $MODDIR${privapp[$x]} ]; then
-			name[$x]=${i%/*}
-			get_app_name ${privapp[$x]} $x
-			x=$((x+1))
-		fi
-	done
-}
-
-list_vendor_app() {
-	x=1
-	venapp=($(ls $SYSTEM/vendor/app))
-	for i in $(ls $SYSTEM/vendor/app); do
-		venapp[$x]=$SYSTEM2/vendor/app/$i
-		ProgressBar $x ${#venapp[@]}
-		if [ ! -d $MODDIR${venapp[$x]} ]; then
-			name[$x]=${i%/*}
-			get_app_name ${venapp[$x]} $x
+			get_app_name ${listapp[$x]} $x
 			x=$((x+1))
 		fi
 	done
@@ -375,7 +349,7 @@ export_list() {
 
 menu_list_system_app() {
 	clear
-	list_system_app 2>>$LOG
+	list_s-app app 2>>$LOG
 	clear
 	echo "$div"
 	echo "${W}System Apps${N}"
@@ -395,14 +369,14 @@ menu_list_system_app() {
 	read app
 	[ "$app" == "x" ] && menu
 	for i in $app; do
-		if [ "$i" -gt "${#app[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+		if [ "$i" -gt "${#listapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
 			echo "$i - Invalid"; false
 		elif [ "$i" == "0" ]; then
 			exit
 		else
 			echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
 			sleep 1
-			mktouch $MODDIR${app[$i]}/.replace ${app_name[$i]}
+			mktouch $MODDIR${listapp[$i]}/.replace ${app_name[$i]}
 			if [ "${app_label[$i]}" ]; then
 				echo -n " - APK stored in /data, delete? < y | n > " 
 				read del_apk; [ "$del_apk" == "y" ] && {
@@ -418,13 +392,12 @@ menu_list_system_app() {
 	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
-	app_name=()
 	[ "$mchoice" == "y" ] && menu || exit
 }
 
 menu_list_system_priv-app() {
 	clear
-	list_system_priv-app 2>>$LOG
+	list_s-app priv-app 2>>$LOG
 	clear
 	echo "$div"
 	echo "${W}System Priv-Apps${N}"
@@ -444,14 +417,14 @@ menu_list_system_priv-app() {
 	read privapp
 	[ "$privapp" == "x" ] && menu
 	for i in $privapp; do
-		if [ "$i" -gt "${#privapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+		if [ "$i" -gt "${#listapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
 			echo "$i - Invalid"; false
 		elif [ "$i" == "0" ]; then
 			exit
 		else
 			echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
 			sleep 1
-			mktouch $MODDIR${privapp[$i]}/.replace ${app_name[$i]}
+			mktouch $MODDIR${listapp[$i]}/.replace ${app_name[$i]}
 			if [ "${app_label[$i]}" ]; then
 				echo -n " - APK stored in /data, delete? < y | n > " 
 				read del_apk; [ "$del_apk" == "y" ] && {
@@ -467,13 +440,12 @@ menu_list_system_priv-app() {
 	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
-	app_name=()
 	[ "$mchoice" == "y" ] && menu || exit
 }
 
 menu_list_vendor_app() {
 	clear
-	list_vendor_app 2>>$LOG
+	list_s-app vendor/app 2>>$LOG
 	clear
     echo "$div"
 	echo "${W}Vendor Apps${N}"
@@ -493,14 +465,14 @@ menu_list_vendor_app() {
 	read vapp
 	[ "$vapp" == "x" ] && menu
 	for i in $app; do
-		if [ "$i" -gt "${#vapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+		if [ "$i" -gt "${#listapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
 			echo "$i - Invalid"; false
 		elif [ "$i" == "0" ]; then
 			exit
 		else
 			echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
 			sleep 1
-			mktouch $MODDIR${venapp[$i]}/.replace ${app_name[$i]}
+			mktouch $MODDIR${listapp[$i]}/.replace ${app_name[$i]}
 			if [ "${app_label[$i]}" ]; then
 				echo -n " - APK stored in /data, delete? < y | n > " 
 				read del_apk; [ "$del_apk" == "y" ] && {
@@ -516,7 +488,6 @@ menu_list_vendor_app() {
 	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
-	app_name=()
 	[ "$mchoice" == "y" ] && menu || exit
 }
 
@@ -643,11 +614,11 @@ case "$1" in
 	-l) shift
 		[ ! "$1" ] && abort "$(help_me)"
 		if [ "$1" == "app" ]; then
-			list_system_app 2>$LOG
+			list_s-app app 2>>$LOG
 		elif [ "$1" == "priv-app" ]; then
-			list_system_priv-app 2>$LOG
+			list_s-app priv-app 2>>$LOG
 		elif [ "$1" == "vendor" ]; then
-			list_vendor_app 2>$LOG
+			list_s-app vendor/app 2>>$LOG
 		else
 			abort "$(help_me)"
 		fi
@@ -655,7 +626,7 @@ case "$1" in
 		echo ""
 		for i in $(seq 1 $((${#app_name[@]}-1))); do
 			[ ! "${app_label[$i]}" ] && app_label[$i]="null"
-			echo "$(echo ${app_name[$i]} | tr '_' ' ') - ${app_label[$i]} - $(echo ${app[$i]} ${privapp[$i]} ${venapp[$i]} | sed 's/\/system/./g')"
+			echo "$(echo ${app_name[$i]} | tr '_' ' ') - ${app_label[$i]} - $(echo ${listapp[$i]} | sed 's/\/system/./g')"
 			c=$((c+1))
 		done; exit;;
 	-d) shift
