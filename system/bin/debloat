@@ -381,7 +381,7 @@ menu_list_system_app() {
 			echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
 			sleep 1
 			mktouch $MODDIR${listapp[$i]}/.replace ${app_name[$i]}
-			if [ "${app_label[$i]}" ]; then
+			if [[ -d "/data/app/${app_label[$i]}-*" ]]; then
 				echo -n " - APK stored in /data, delete? < y | n > " 
 				read del_apk; [ "$del_apk" == "y" ] && {
 					data_apkdir=$(echo /data/app/${app_label[$i]}-*)
@@ -429,7 +429,7 @@ menu_list_system_priv-app() {
 			echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
 			sleep 1
 			mktouch $MODDIR${listapp[$i]}/.replace ${app_name[$i]}
-			if [ "${app_label[$i]}" ]; then
+			if [[ -d "/data/app/${app_label[$i]}-*" ]]; then
 				echo -n " - APK stored in /data, delete? < y | n > " 
 				read del_apk; [ "$del_apk" == "y" ] && {
 					data_apkdir=$(echo /data/app/${app_label[$i]}-*)
@@ -477,7 +477,7 @@ menu_list_vendor_app() {
 			echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
 			sleep 1
 			mktouch $MODDIR${listapp[$i]}/.replace ${app_name[$i]}
-			if [ "${app_label[$i]}" ]; then
+			if [[ -d "/data/app/${app_label[$i]}-*" ]]; then
 				echo -n " - APK stored in /data, delete? < y | n > " 
 				read del_apk; [ "$del_apk" == "y" ] && {
 					data_apkdir=$(echo /data/app/${app_label[$i]}-*)
@@ -658,7 +658,7 @@ case "$1" in
 			name[0]=${app_dir##*/}; get_app_name $app_dir 0 2>$LOG
 			echo "Uninstalling ${app_name[0]}" | tr '_' ' '
 			mktouch $MODDIR$app_dir/.replace ${app_name[0]}
-			if [ "${app_label[0]}" ]; then
+			if [[ -d "/data/app/${app_label[$i]}-*" ]]; then
 				echo -n " - APK stored in /data, delete? < y | n > " 
 				read del_apk; [ "$del_apk" == "y" ] && {
 					data_apkdir=$(echo /data/app/${app_label[0]}-*)
