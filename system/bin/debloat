@@ -356,7 +356,7 @@ menu_list_system_app() {
 	list_s-app app 2>>$LOG
 	clear
 	echo "$div"
-	echo "${W}System Apps${N}"
+	title_div "System Apps"
 	echo "$div"
 	echo ""
 	c=1
@@ -404,7 +404,7 @@ menu_list_system_priv-app() {
 	list_s-app priv-app 2>>$LOG
 	clear
 	echo "$div"
-	echo "${W}System Priv-Apps${N}"
+	title_div "System Priv-Apps"
 	echo "$div"
 	echo ""
 	c=1
@@ -452,7 +452,7 @@ menu_list_vendor_app() {
 	list_s-app vendor/app 2>>$LOG
 	clear
     echo "$div"
-	echo "${W}Vendor Apps${N}"
+	title_div "Vendor Apps"
 	echo "$div"
 	echo ""
 	c=1
@@ -498,7 +498,7 @@ menu_list_vendor_app() {
 menu_list_unin_app() {
 	clear
 	echo "$div"
-	echo "${W}Reinstall${N}"
+	title_div "Reinstall"
 	echo " You can also just delete your selected
  folders in $MODDIR$SYSTEM2/app or priv-app."
 	echo " The apps debloated were reset
