@@ -16,6 +16,9 @@
 
 ## Changelog
 
+### v13.1
+* Fix detection of apk in /data
+* Misc improvements
 ### v13
 * debloat -d now supports app label (e.g. com.android.terminal)
 * Misc improvements
