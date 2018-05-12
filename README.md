@@ -16,8 +16,11 @@
 
 ## Changelog
 
+### v13.2
+* Fix listing system apps that are debloated
 ### v13.1
 * Fix detection of apk in /data
+* System app listing looks better and much more readable :3
 * Misc improvements
 ### v13
 * debloat -d now supports app label (e.g. com.android.terminal)

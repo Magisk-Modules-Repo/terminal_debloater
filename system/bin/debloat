@@ -290,7 +290,7 @@ list_s-app() {
 	for i in $(ls $SYSTEM/$type); do
 		listapp[$x]=$SYSTEM2/$type/$i
 		ProgressBar $x ${#sapp[@]}
-		if [[ ! -d $MODDIR${sapp[$x]} ]]; then
+		if [[ ! -d $MODDIR${listapp[$x]} ]]; then
 			name[$x]=${i%/*}
 			get_app_name ${listapp[$x]} $x
 			x=$((x+1))
