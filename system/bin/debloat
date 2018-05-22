@@ -247,12 +247,12 @@ show_rein=false
 [ $(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f) ] &&  show_rein=true
 
 use_aapt=false
-[[ "$(which aapt)" ]] && let use_aapt=true
+[[ "$(which aapt)" ]] && use_aapt=true
 export PATH=$MODDIR:$PATH
 import_file=/cache/import-debloat.txt
 
 get_app_name() {
-	if [ -x $MODDIR/aapt ] || [ -x $SYSTEM/bin/aapt ] || [ -x $SYSTEM/xbin/aapt ] || [ $use_aapt ]; then
+	if [ $use_aapt ]; then
 		app_name=$(aapt dump badging $1/${name[$2]}.apk 2>$LOG | grep 'application-label:' 2>/dev/null)
 		if [ $? -gt 0 ]; then
 			app_name[$2]=${name[$2]}
