@@ -352,7 +352,7 @@ menu_list_system_app() {
 		c=$((c+1))
 	done
 	echo ""
-	echo " ${Bl}To uninstall multiple apps, enter multiple number. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
+	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
 	echo " x - ${Bl}Back to Menu${N}"
 	echo " 0 - ${Bl}Exit${N}"
 	echo "$div"
@@ -400,7 +400,7 @@ menu_list_system_priv-app() {
 		c=$((c+1))
 	done
 	echo ""
-	echo " ${Bl}To uninstall multiple apps, enter multiple number. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
+	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
 	echo " x - ${Bl}Back to Menu${N}"
 	echo " 0 - ${Bl}Exit${N}"
 	echo "$div"
@@ -448,7 +448,7 @@ menu_list_vendor_app() {
 		c=$((c+1))
 	done
 	echo ""
-	echo " ${Bl}To uninstall multiple apps, enter multiple number. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
+	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
 	echo " x - ${Bl}Back to Menu${N}"
 	echo " 0 - ${Bl}Exit${N}"
 	echo "$div"
@@ -494,7 +494,7 @@ menu_list_unin_app() {
 	echo ""
 	list_unin_app
 	echo ""
-	echo " ${Bl}To reinstall multiple apps, enter multiple number. Example:${N} \"1 $(echo ${#name_unin[$((${#name_unin[@]}/3))]}) $(echo ${#name_unin[$((${#name_unin[@]}/2))]})\""
+	echo " ${Bl}To reinstall multiple apps, enter multiple numbers. Example:${N} \"1 $(echo ${#name_unin[$((${#name_unin[@]}/3))]}) $(echo ${#name_unin[$((${#name_unin[@]}/2))]})\""
 	echo " x - ${Bl}Back to Menu${N}"
 	echo " 0 - ${Bl}Exit${N}"
 	echo ""
