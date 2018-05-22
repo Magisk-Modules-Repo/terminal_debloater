@@ -243,21 +243,8 @@ exit
 }
 
 show_rein=false
-if [ -d $MODDIR$SYSTEM2/app ]; then
-	for i in $MODDIR$SYSTEM2/app/*; do
-		if [ -f $i/.replace ]; then
-			show_rein=true
-			break
-		fi
-	done
-elif [ -d $MODDIR$SYSTEM2/priv-app ]; then
-	for i in $MODDIR$SYSTEM2/priv-app/*; do
-		if [ -f $i/.replace ]; then
-			show_rein=true
-			break
-		fi
-	done
-fi
+[ $(find $MODDIR$SYSTEM2/app -name ".replace" -type f) ] &&  show_rein=true
+[ $(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f) ] &&  show_rein=true
 
 use_aapt=false
 [[ "$(which aapt)" ]] && let use_aapt=true
