@@ -243,8 +243,8 @@ exit
 }
 
 show_rein=false
-[ $(find $MODDIR$SYSTEM2/app -name ".replace" -type f) ] &&  show_rein=true
-[ $(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f) ] &&  show_rein=true
+[ -n "$(find $MODDIR$SYSTEM2/app -name ".replace" -type f)" ] &&  show_rein=true
+[ -n "$(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f)" ] &&  show_rein=true
 
 use_aapt=false
 [[ "$(which aapt)" ]] && use_aapt=true
