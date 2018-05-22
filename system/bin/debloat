@@ -253,6 +253,7 @@ use_aapt=false
 [[ "$(which aapt)" ]] && use_aapt=true
 export PATH=$MODDIR:$PATH
 import_file=/cache/import-debloat.txt
+exclude_file=$MODDIR/exclude.list
 
 get_app_name() {
 	if [ $use_aapt ]; then
@@ -277,13 +278,15 @@ list_s-app() {
 	x=1
 	type=$1
 	sapp=($(ls $SYSTEM/$type))
-	for i in $(ls $SYSTEM/$type); do
-		listapp[$x]=$SYSTEM2/$type/$i
+	for i in ${sapp[@]}; do
 		ProgressBar $x ${#sapp[@]}
+		listapp[$x]=$SYSTEM2/$type/$i
 		if [[ ! -d $MODDIR${listapp[$x]} ]]; then
-			name[$x]=${i%/*}
-			get_app_name ${listapp[$x]} $x
-			x=$((x+1))
+			if ! grep -q /${i} $exclude_file; then
+				name[$x]=${i}
+				get_app_name ${listapp[$x]} $x
+				x=$((x+1))
+			fi
 		fi
 	done
 }
