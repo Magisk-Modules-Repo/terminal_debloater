@@ -182,12 +182,15 @@ spinner() {
 		printf "\rLoading [${anim:$h:1}]"
 	done
 }
-
+test_connection() {
+	echo -n "Testing internet connection "
+	ping -q -c 1 -W 1 google.com >/dev/null 2>/dev/null && echo "- OK" || { echo "Error"; false; }
+}
 # Log files will be uploaded to termbin.com
 upload_logs() {
 	$BBok && {
-		echo -n "Testing internet connection "
-		ping -q -c 1 -W 1 google.com >/dev/null 2>/dev/null && echo "- OK" || { echo "Error"; exit 1; }
+		test_connection
+		[ $? -ne 0 ] && exit
 		verUp=none; oldverUp=none; logUp=none; oldlogUp=none;
 		echo "Uploading logs"
 		[ -s $VERLOG ] && verUp=$(cat $VERLOG | nc termbin.com 9999)
