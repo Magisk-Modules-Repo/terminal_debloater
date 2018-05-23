@@ -74,7 +74,7 @@ else
 fi
 [ $? -ne 0 ] && exit $?
 alias echo='echo -e'
-[ -n "$LOGNAME" ] && alias clear='clear && echo'
+[ -n "$LOGNAME" ] && alias clear='echo'
 _bbname=$(busybox | head -n1)
 _bbname=${_bbname%'('*}
 BBok=true
