@@ -316,6 +316,17 @@ list_unin_app() {
 			c=$((c+1))
 		done
 	fi
+	if [ -d $SYSTEM/vendor/app ] && [ -d $MODDIR$SYSTEM2/vendor/app ]; then
+		for i in $(ls $MODDIR$SYSTEM2/vendor/app); do
+			unin_app[$c]=$MODDIR$SYSTEM2/vendor/app/$i
+			name_unin[$c]=$(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace)
+			if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace) ]]; then
+				name_unin[$c]=$i
+			fi
+			echo " $c - ${W}${name_unin[$c]}${N}" | tr '_' ' '
+			c=$((c+1))
+		done
+	fi
 }
 
 import_list() {
