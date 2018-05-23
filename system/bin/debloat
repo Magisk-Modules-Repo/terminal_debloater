@@ -4,7 +4,6 @@
 
 
 # Magisk Module ID **
-# > ENTER MAGISK MODULE ID HERE
 ID="terminal_debloater"
 
 #=========================== Check root
@@ -38,7 +37,6 @@ else
 fi
 
 #=========================== Set Busybox (Used by Magisk) up
-# > Do not touch!
 set_busybox() {
 	if [ -x "$1" ]; then
 		for i in $(${1} --list); do
@@ -134,7 +132,7 @@ W='\e[01;37m'		# WHITE TEXT
 BGBL='\e[1;30;47m'	# Background W Text Bl
 N='\e[0m'			# How to use (example): echo "${G}example${N}"
 loadBar=' '			# Load UI
-# Remove colors if -nc or in ADB Shell
+# Remove color codes if -nc or in ADB Shell
 [ -n "$1" -a "$1" == "-nc" ] && shift && NC=true
 [ "$NC" -o -n "$LOGNAME" ] && {
 	G=''; R=''; Y=''; B=''; V=''; Bl=''; C=''; W=''; N=''; BGBL=''; loadBar='=';
@@ -144,7 +142,7 @@ loadBar=' '			# Load UI
 character_no=$(echo $MODTITLE $VER $REL | tr " " '_' | wc -c)
 div="${Bl}$(printf '%*s' "${character_no}" '' | tr " " "=")${N}"
 
-# Title Div :3
+# Title Div
 title_div() {
 	no=$(echo $@ | wc -c)
 	extdiv=$((no-character_no))
@@ -182,10 +180,13 @@ spinner() {
 		printf "\rLoading [${anim:$h:1}]"
 	done
 }
+
+# test_connection
 test_connection() {
 	echo -n "Testing internet connection "
 	ping -q -c 1 -W 1 google.com >/dev/null 2>/dev/null && echo "- OK" || { echo "Error"; false; }
 }
+
 # Log files will be uploaded to termbin.com
 upload_logs() {
 	$BBok && {
