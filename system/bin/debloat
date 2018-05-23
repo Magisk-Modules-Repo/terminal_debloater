@@ -284,6 +284,7 @@ list_s-app() {
 		if [[ ! -d $MODDIR${listapp[$x]} ]]; then
 			if ! grep -q /${i} $exclude_file; then
 				name[$x]=${i}
+				apk_name[$x]="${i}.apk"
 				get_app_name ${listapp[$x]} $x
 				x=$((x+1))
 			fi
