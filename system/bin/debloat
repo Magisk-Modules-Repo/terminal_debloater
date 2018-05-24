@@ -247,9 +247,6 @@ exit
 }
 
 show_rein=false
-[ -n "$(find $MODDIR$SYSTEM2/app -name ".replace" -type f)" ] &&  show_rein=true
-[ -n "$(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f)" ] &&  show_rein=true
-
 use_aapt=false
 [[ "$(which aapt)" ]] && use_aapt=true
 export PATH=$MODDIR:$PATH
@@ -539,6 +536,8 @@ menu_list_unin_app() {
 }
 
 menu() {
+	[ -n "$(find $MODDIR$SYSTEM2/app -name ".replace" -type f)" ] &&  show_rein=true
+	[ -n "$(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f)" ] &&  show_rein=true
 	mod_head
 	echo ""
 	[ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
