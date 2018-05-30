@@ -288,6 +288,8 @@ list_s-app() {
 			fi
 		fi
 	done
+	#u_app_name=($(echo "${app_name[@]}" | sed "s/.*'//g"))
+	#app_name=($(printf '%s\n' "${u_app_name[@]}" | sort -f))
 }
 
 list_unin_app() {
