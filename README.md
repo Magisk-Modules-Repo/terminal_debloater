@@ -16,6 +16,9 @@
 
 ## Changelog
 
+### v13.3
+* Exclude critical system apps from listing
+* Misc improvements
 ### v13.2
 * Fix listing system apps that are debloated
 ### v13.1
