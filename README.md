@@ -16,6 +16,10 @@
 
 ## Changelog
 
+### v13.4
+* Improve exclude detection
+* Updated exclude list
+* Misc improvements
 ### v13.3
 * Exclude critical system apps from listing
 * Misc improvements
