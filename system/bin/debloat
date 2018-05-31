@@ -280,7 +280,7 @@ list_s-app() {
 		ProgressBar $x ${#sapp[@]}
 		listapp[$x]=$SYSTEM2/$type/$i
 		if [[ ! -d $MODDIR${listapp[$x]} ]]; then
-			if ! grep -q /${i} $exclude_file; then
+			if ! grep -xqE -e "(app|priv-app|vendor/app)/${i}" $exclude_file; then
 				name[$x]=${i}
 				apk_name[$x]="${i}.apk"
 				get_app_name ${listapp[$x]} $x
