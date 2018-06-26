@@ -256,8 +256,8 @@ exit
 
 show_rein=false
 use_aapt=false
-[[ "$(which aapt)" ]] && use_aapt=true
 export PATH=$MODDIR:$PATH
+[[ "$(which aapt)" ]] && use_aapt=true
 import_file=/cache/import-debloat.txt
 exclude_file=$MODDIR/exclude.list
 
