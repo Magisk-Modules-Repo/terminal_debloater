@@ -295,12 +295,12 @@ list_s-app() {
 	sapp=($(ls $SYSTEM/$type))
 	for i in ${sapp[@]}; do
 		ProgressBar $x ${#sapp[@]}
-		listapp[$x]=$SYSTEM2/$type/$i
-		if [[ ! -d $MODDIR${listapp[$x]} ]]; then
+		listapp[x]=$SYSTEM2/$type/$i
+		if [[ ! -d $MODDIR${listapp[x]} ]]; then
 			if ! grep -xqE -e "(app|priv-app|vendor/app)/${i}" $exclude_file; then
-				name[$x]=${i}
-				apk_name[$x]="${i}.apk"
-				get_app_name ${listapp[$x]} $x
+				name[x]=${i}
+				apk_name[x]="${i}.apk"
+				get_app_name ${listapp[x]} $x
 				x=$((x+1))
 			fi
 		fi
@@ -313,34 +313,34 @@ list_unin_app() {
 	c=1
 	if [ -d $SYSTEM/app ] && [ -d $MODDIR$SYSTEM2/app ]; then
 		for i in $(ls $MODDIR$SYSTEM2/app); do
-			unin_app[$c]=$MODDIR$SYSTEM2/app/$i
-			name_unin[$c]=$(cat $MODDIR$SYSTEM2/app/$i/.replace)
-			if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/app/$i/.replace) ]]; then
-				name_unin[$c]=$i
+			unin_app[c]=$MODDIR$SYSTEM2/app/$i
+			name_unin[c]=$(cat $MODDIR$SYSTEM2/app/$i/.replace)
+			if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/app/$i/.replace) ]]; then
+				name_unin[c]=$i
 			fi
-			echo " $c - ${W}${name_unin[$c]}${N}" | tr '_' ' '
+			echo " $c - ${W}${name_unin[c]}${N}" | tr '_' ' '
 			c=$((c+1))
 		done
 	fi
 	if [ -d $SYSTEM/priv-app ] && [ -d $MODDIR$SYSTEM2/priv-app ]; then
 		for i in $(ls $MODDIR$SYSTEM2/priv-app); do
-			unin_app[$c]=$MODDIR$SYSTEM2/priv-app/$i
-			name_unin[$c]=$(cat $MODDIR$SYSTEM2/priv-app/$i/.replace)
-			if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/priv-app/$i/.replace) ]]; then
-				name_unin[$c]=$i
+			unin_app[c]=$MODDIR$SYSTEM2/priv-app/$i
+			name_unin[c]=$(cat $MODDIR$SYSTEM2/priv-app/$i/.replace)
+			if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/priv-app/$i/.replace) ]]; then
+				name_unin[c]=$i
 			fi
-			echo " $c - ${W}${name_unin[$c]}${N}" | tr '_' ' '
+			echo " $c - ${W}${name_unin[c]}${N}" | tr '_' ' '
 			c=$((c+1))
 		done
 	fi
 	if [ -d $SYSTEM/vendor/app ] && [ -d $MODDIR$SYSTEM2/vendor/app ]; then
 		for i in $(ls $MODDIR$SYSTEM2/vendor/app); do
-			unin_app[$c]=$MODDIR$SYSTEM2/vendor/app/$i
-			name_unin[$c]=$(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace)
-			if [ $? -gt 0 ] || [ -z ${name_unin[$c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace) ]]; then
-				name_unin[$c]=$i
+			unin_app[c]=$MODDIR$SYSTEM2/vendor/app/$i
+			name_unin[c]=$(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace)
+			if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace) ]]; then
+				name_unin[c]=$i
 			fi
-			echo " $c - ${W}${name_unin[$c]}${N}" | tr '_' ' '
+			echo " $c - ${W}${name_unin[c]}${N}" | tr '_' ' '
 			c=$((c+1))
 		done
 	fi
@@ -352,11 +352,11 @@ import_list() {
 		c=1
 		import_apps=($(cat $import_file))
 		for i in ${import_apps[@]}; do
-			name[$c]=${i##*/}
+			name[c]=${i##*/}
 			sys_dir=${i#*${MODDIR}}
 			get_app_name $sys_dir $c
-			mktouch $i/.replace ${app_name[$c]}
-			echo "${W}${app_name[$c]}${N} - Imported"
+			mktouch $i/.replace ${app_name[c]}
+			echo "${W}${app_name[c]}${N} - Imported"
 			c=$((c+1))
 		done
 	else
@@ -383,7 +383,7 @@ menu_list_system_app() {
 	echo ""
 	c=1
 	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		echo " $c - $(echo ${W}${app_name[$i]}${N} | tr '_' ' ')"
+		echo " $c - $(echo ${W}${app_name[i]}${N} | tr '_' ' ')"
 		c=$((c+1))
 	done
 	echo ""
@@ -400,13 +400,13 @@ menu_list_system_app() {
 		elif [ "$i" == "0" ]; then
 			exit
 		else
-			echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
+			echo "Uninstalling ${R}${app_name[i]}${N}" | tr '_' ' '
 			sleep 1
-			mktouch $MODDIR${listapp[$i]}/.replace ${app_name[$i]}
-			if [[ -d "/data/app/${app_label[$i]}-*" ]]; then
+			mktouch $MODDIR${listapp[i]}/.replace ${app_name[i]}
+			if [[ -d "/data/app/${app_label[i]}-*" ]]; then
 				echo -n " - APK stored in /data, delete? < y | n > " 
 				read del_apk; [ "$del_apk" == "y" ] && {
-					data_apkdir=$(echo /data/app/${app_label[$i]}-*)
+					data_apkdir=$(echo /data/app/${app_label[i]}-*)
 					if [ -d "${data_apkdir}" ]; then
 						rm -rf ${data_apkdir} 2>/dev/null
 						echo " - deleted"
@@ -431,7 +431,7 @@ menu_list_system_priv-app() {
 	echo ""
 	c=1
 	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		echo " $c - $(echo ${W}${app_name[$i]}${N} | tr '_' ' ')"
+		echo " $c - $(echo ${W}${app_name[i]}${N} | tr '_' ' ')"
 		c=$((c+1))
 	done
 	echo ""
@@ -448,13 +448,13 @@ menu_list_system_priv-app() {
 		elif [ "$i" == "0" ]; then
 			exit
 		else
-			echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
+			echo "Uninstalling ${R}${app_name[i]}${N}" | tr '_' ' '
 			sleep 1
-			mktouch $MODDIR${listapp[$i]}/.replace ${app_name[$i]}
-			if [[ -d "/data/app/${app_label[$i]}-*" ]]; then
+			mktouch $MODDIR${listapp[i]}/.replace ${app_name[i]}
+			if [[ -d "/data/app/${app_label[i]}-*" ]]; then
 				echo -n " - APK stored in /data, delete? < y | n > " 
 				read del_apk; [ "$del_apk" == "y" ] && {
-					data_apkdir=$(echo /data/app/${app_label[$i]}-*)
+					data_apkdir=$(echo /data/app/${app_label[i]}-*)
 					if [ -d "${data_apkdir}" ]; then
 						rm -rf ${data_apkdir} 2>/dev/null
 						echo " - deleted"
@@ -479,7 +479,7 @@ menu_list_vendor_app() {
 	echo ""
 	c=1
 	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		echo " $c - $(echo ${W}${app_name[$i]}${N} | tr '_' ' ')"
+		echo " $c - $(echo ${W}${app_name[i]}${N} | tr '_' ' ')"
 		c=$((c+1))
 	done
 	echo ""
@@ -496,13 +496,13 @@ menu_list_vendor_app() {
 		elif [ "$i" == "0" ]; then
 			exit
 		else
-			echo "Uninstalling ${R}${app_name[$i]}${N}" | tr '_' ' '
+			echo "Uninstalling ${R}${app_name[i]}${N}" | tr '_' ' '
 			sleep 1
-			mktouch $MODDIR${listapp[$i]}/.replace ${app_name[$i]}
-			if [[ -d "/data/app/${app_label[$i]}-*" ]]; then
+			mktouch $MODDIR${listapp[i]}/.replace ${app_name[i]}
+			if [[ -d "/data/app/${app_label[i]}-*" ]]; then
 				echo -n " - APK stored in /data, delete? < y | n > " 
 				read del_apk; [ "$del_apk" == "y" ] && {
-					data_apkdir=$(echo /data/app/${app_label[$i]}-*)
+					data_apkdir=$(echo /data/app/${app_label[i]}-*)
 					if [ -d "${data_apkdir}" ]; then
 						rm -rf ${data_apkdir} 2>/dev/null
 						echo " - deleted"
@@ -542,9 +542,9 @@ menu_list_unin_app() {
 		elif [ "$i" == "0" ]; then
 			exit
 		else
-			echo "Reinstalling ${G}${name_unin[$i]}${N}" | tr '_' ' '
+			echo "Reinstalling ${G}${name_unin[i]}${N}" | tr '_' ' '
 			sleep 1
-			rm -rf ${unin_app[$i]}
+			rm -rf ${unin_app[i]}
 		fi
 	done
 	echo "Reboot to apply changes"
@@ -653,9 +653,9 @@ case "$1" in
 		c=1
 		echo
 		for i in ${!app_name[@]}; do
-			[ ! "${app_label[$i]}" ] && app_label[$i]="null"
+			[ ! "${app_label[i]}" ] && app_label[i]="null"
 			title_div "App $i"
-			echo "Name\t: $(echo ${app_name[$i]} | tr '_' ' ')\nLabel\t: ${app_label[$i]}\nDirectory\t: $(echo ${listapp[$i]} | sed 's/.*\/system\///g')" | expand -t 10
+			echo "Name\t: $(echo ${app_name[i]} | tr '_' ' ')\nLabel\t: ${app_label[i]}\nDirectory\t: $(echo ${listapp[i]} | sed 's/.*\/system\///g')" | expand -t 10
 			c=$((c+1))
 		done; exit;;
 	-d) shift
@@ -682,7 +682,7 @@ case "$1" in
 			name[0]=${app_dir##*/}; get_app_name $app_dir 0 2>$LOG
 			echo "Uninstalling ${app_name[0]}" | tr '_' ' '
 			mktouch $MODDIR$app_dir/.replace ${app_name[0]}
-			if [[ -d "/data/app/${app_label[$i]}-*" ]]; then
+			if [[ -d "/data/app/${app_label[i]}-*" ]]; then
 				echo -n " - APK stored in /data, delete? < y | n > " 
 				read del_apk; [ "$del_apk" == "y" ] && {
 					data_apkdir=$(echo /data/app/${app_label[0]}-*)
