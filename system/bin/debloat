@@ -87,20 +87,11 @@ fi
 [ -f /data/adb/magisk/util_functions.sh ] && . /data/adb/magisk/util_functions.sh || exit 1
 
 # Magisk Mod Directory
-MOUNTPATH=/magisk
-if [ ! -d $MOUNTPATH ]; then
-	if [ -d /sbin/.core/img ]; then
-		MOUNTPATH=/sbin/.core/img
-	fi
-fi
+MOUNTPATH=/sbin/.core/img
 MODDIR="$MOUNTPATH/$ID"
 if [ ! -d $MODDIR ]; then
-	if [ -d /sbin/.core/img/$ID ]; then
-		MODDIR=/sbin/.core/img/$ID
-	else
-		echo "Module not detected!"
-		exit 1
-	fi
+	echo "Module not detected!"
+	exit 1
 fi
 
 # Device Info
