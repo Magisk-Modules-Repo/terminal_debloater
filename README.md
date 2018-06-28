@@ -16,6 +16,9 @@
 
 ## Changelog
 
+### v13.5
+* Sort listed apps alphabetically
+* Misc improvements
 ### v13.4
 * Improve exclude detection
 * Updated exclude list
