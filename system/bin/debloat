@@ -61,9 +61,17 @@ export PATH=$MODDIR:$PATH
 [[ "$(which aapt)" ]] && use_aapt=true
 import_file=/cache/import-debloat.txt
 exclude_file=$MODDIR/exclude.list
+LISTFILE=/cache/debloat.list
+
+get_cfg() {
+	APP_NAME=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $1}')
+	DIR_APP=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}')
+	PKG=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $3}')
+	[ $? -gt 0 ] && abort "Package doesn't exist!"
+}
 
 get_app_name() {
-	if [ $use_aapt ]; then
+	if $use_aapt; then
 		app_name=$(aapt dump badging $1/${name[$2]}.apk 2>$LOG | grep 'application-label:' 2>/dev/null)
 		if [ $? -gt 0 ]; then
 			app_name[$2]=${name[$2]}
@@ -81,7 +89,7 @@ get_app_name() {
 }
 
 list_s-app() {
-	app_name=(); listapp=()
+	rm $LISTFILE 2>$LOG; app_name=(); listapp=()
 	x=1
 	type=$1
 	sapp=($(ls $SYSTEM/$type))
@@ -93,12 +101,13 @@ list_s-app() {
 				name[x]=${i}
 				apk_name[x]="${i}.apk"
 				get_app_name ${listapp[x]} $x
+				echo "^=${app_name[x]}^=${listapp[x]}^=${app_label[x]}" >> $LISTFILE
 				x=$((x+1))
 			fi
 		fi
 	done
-	#u_app_name=($(echo "${app_name[@]}" | sed "s/.*'//g"))
-	#app_name=($(printf '%s\n' "${u_app_name[@]}" | sort -f))
+	u_app_name=($(echo "${app_name[@]}" | sed "s/.*'//g"))
+	app_name=($(printf '%s\n' "${u_app_name[@]}" | sort -f))
 }
 
 list_unin_app() {
@@ -192,19 +201,22 @@ menu_list_system_app() {
 		elif [ "$i" == "0" ]; then
 			exit
 		else
-			echo "Uninstalling ${R}${app_name[i]}${N}" | tr '_' ' '
+			get_cfg ${app_name[i]}
+			echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
 			sleep 1
-			mktouch $MODDIR${listapp[i]}/.replace ${app_name[i]}
-			if [[ -d "/data/app/${app_label[i]}-*" ]]; then
-				echo -n " - APK stored in /data, delete? < y | n > " 
-				read del_apk; [ "$del_apk" == "y" ] && {
-					data_apkdir=$(echo /data/app/${app_label[i]}-*)
-					if [ -d "${data_apkdir}" ]; then
-						rm -rf ${data_apkdir} 2>/dev/null
-						echo " - deleted"
-					fi
-				} || echo " - not deleted"
-			fi
+			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
+			$use_aapt && {
+				if [[ -d "/data/app/$PKG-*" ]]; then
+					echo -n " - APK stored in /data, delete? < y | n > "
+					read del_apk; [ "$del_apk" == "y" ] && {
+						data_apkdir=$(echo /data/app/$PKG-*)
+						if [ -d "${data_apkdir}" ]; then
+							rm -rf ${data_apkdir} 2>/dev/null
+							echo " - deleted"
+						fi
+					} || echo " - not deleted"
+				fi
+			}
 		fi
 	done
 	echo "Reboot to apply changes"
@@ -240,19 +252,22 @@ menu_list_system_priv-app() {
 		elif [ "$i" == "0" ]; then
 			exit
 		else
-			echo "Uninstalling ${R}${app_name[i]}${N}" | tr '_' ' '
+			get_cfg ${app_name[i]}
+			echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
 			sleep 1
-			mktouch $MODDIR${listapp[i]}/.replace ${app_name[i]}
-			if [[ -d "/data/app/${app_label[i]}-*" ]]; then
-				echo -n " - APK stored in /data, delete? < y | n > " 
-				read del_apk; [ "$del_apk" == "y" ] && {
-					data_apkdir=$(echo /data/app/${app_label[i]}-*)
-					if [ -d "${data_apkdir}" ]; then
-						rm -rf ${data_apkdir} 2>/dev/null
-						echo " - deleted"
-					fi
-				} || echo " - not deleted"
-			fi
+			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
+			$use_aapt && {
+				if [[ -d "/data/app/$PKG-*" ]]; then
+					echo -n " - APK stored in /data, delete? < y | n > "
+					read del_apk; [ "$del_apk" == "y" ] && {
+						data_apkdir=$(echo /data/app/$PKG-*)
+						if [ -d "${data_apkdir}" ]; then
+							rm -rf ${data_apkdir} 2>/dev/null
+							echo " - deleted"
+						fi
+					} || echo " - not deleted"
+				fi
+			}
 		fi
 	done
 	echo "Reboot to apply changes"
@@ -288,19 +303,22 @@ menu_list_vendor_app() {
 		elif [ "$i" == "0" ]; then
 			exit
 		else
-			echo "Uninstalling ${R}${app_name[i]}${N}" | tr '_' ' '
+			get_cfg ${app_name[i]}
+			echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
 			sleep 1
-			mktouch $MODDIR${listapp[i]}/.replace ${app_name[i]}
-			if [[ -d "/data/app/${app_label[i]}-*" ]]; then
-				echo -n " - APK stored in /data, delete? < y | n > " 
-				read del_apk; [ "$del_apk" == "y" ] && {
-					data_apkdir=$(echo /data/app/${app_label[i]}-*)
-					if [ -d "${data_apkdir}" ]; then
-						rm -rf ${data_apkdir} 2>/dev/null
-						echo " - deleted"
-					fi
-				} || echo " - not deleted"
-			fi
+			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
+			$use_aapt && {
+				if [[ -d "/data/app/$PKG-*" ]]; then
+					echo -n " - APK stored in /data, delete? < y | n > "
+					read del_apk; [ "$del_apk" == "y" ] && {
+						data_apkdir=$(echo /data/app/$PKG-*)
+						if [ -d "${data_apkdir}" ]; then
+							rm -rf ${data_apkdir} 2>/dev/null
+							echo " - deleted"
+						fi
+					} || echo " - not deleted"
+				fi
+			}
 		fi
 	done
 	echo "Reboot to apply changes"
