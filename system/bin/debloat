@@ -63,6 +63,9 @@ import_file=/cache/import-debloat.txt
 exclude_file=$MODDIR/exclude.list
 LISTFILE=/cache/debloat.list
 
+[ $LOGNAME ] && use_cmd=true || use_cmd=false
+[ $(getenforce) == "Permissive" ] && use_cmd=true || use_cmd=false
+
 get_cfg() {
 	APP_NAME=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $1}')
 	DIR_APP=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}')
@@ -206,15 +209,13 @@ menu_list_system_app() {
 			sleep 1
 			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
 			$use_aapt && {
-				if [[ -d "/data/app/$PKG-*" ]]; then
-					echo -n " - APK stored in /data, delete? < y | n > "
-					read del_apk; [ "$del_apk" == "y" ] && {
-						data_apkdir=$(echo /data/app/$PKG-*)
-						if [ -d "${data_apkdir}" ]; then
-							rm -rf ${data_apkdir} 2>/dev/null
-							echo " - deleted"
-						fi
-					} || echo " - not deleted"
+				if $(dumpsys package $PKG | grep -qm1 UPDATED_SYSTEM_APP); then
+					$use_cmd && {
+						echo " - App is updated, uninstalling updates"
+						pm uninstall $PKG
+					} || {
+						echo " - App is updated, uninstall updates in Settings App"
+					}
 				fi
 			}
 		fi
@@ -257,15 +258,13 @@ menu_list_system_priv-app() {
 			sleep 1
 			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
 			$use_aapt && {
-				if [[ -d "/data/app/$PKG-*" ]]; then
-					echo -n " - APK stored in /data, delete? < y | n > "
-					read del_apk; [ "$del_apk" == "y" ] && {
-						data_apkdir=$(echo /data/app/$PKG-*)
-						if [ -d "${data_apkdir}" ]; then
-							rm -rf ${data_apkdir} 2>/dev/null
-							echo " - deleted"
-						fi
-					} || echo " - not deleted"
+				if $(dumpsys package $PKG | grep -qm1 UPDATED_SYSTEM_APP); then
+					$use_cmd && {
+						echo " - App is updated, uninstalling updates"
+						pm uninstall $PKG
+					} || {
+						echo " - App is updated, uninstall updates in Settings App"
+					}
 				fi
 			}
 		fi
@@ -308,15 +307,13 @@ menu_list_vendor_app() {
 			sleep 1
 			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
 			$use_aapt && {
-				if [[ -d "/data/app/$PKG-*" ]]; then
-					echo -n " - APK stored in /data, delete? < y | n > "
-					read del_apk; [ "$del_apk" == "y" ] && {
-						data_apkdir=$(echo /data/app/$PKG-*)
-						if [ -d "${data_apkdir}" ]; then
-							rm -rf ${data_apkdir} 2>/dev/null
-							echo " - deleted"
-						fi
-					} || echo " - not deleted"
+				if $(dumpsys package $PKG | grep -qm1 UPDATED_SYSTEM_APP); then
+					$use_cmd && {
+						echo " - App is updated, uninstalling updates"
+						pm uninstall $PKG
+					} || {
+						echo " - App is updated, uninstall updates in Settings App"
+					}
 				fi
 			}
 		fi
@@ -492,15 +489,13 @@ case "$1" in
 			name[0]=${app_dir##*/}; get_app_name $app_dir 0 2>$LOG
 			echo "Uninstalling ${app_name[0]}" | tr '_' ' '
 			mktouch $MODDIR$app_dir/.replace ${app_name[0]}
-			if [[ -d "/data/app/${app_label[i]}-*" ]]; then
-				echo -n " - APK stored in /data, delete? < y | n > " 
-				read del_apk; [ "$del_apk" == "y" ] && {
-					data_apkdir=$(echo /data/app/${app_label[0]}-*)
-					if [ -d "${data_apkdir}" ]; then
-						rm -rf ${data_apkdir} 2>/dev/null
-						echo " - deleted"
-					fi
-				} || echo " - not deleted"
+			if $(dumpsys package ${app_label[i]} | grep -qm1 UPDATED_SYSTEM_APP); then
+				$use_cmd && {
+					echo " - App is updated, uninstalling updates"
+					pm uninstall $PKG
+				} || {
+					echo " - App is updated, uninstall updates in Settings App"
+				}
 			fi
 		done
 		$ok || abort "error: Use \"$_name -d -h\" for help"
