@@ -1,7 +1,7 @@
 id=terminal_debloater
 name=Debloater (Terminal Emulator)
-version=v13.5
-versionCode=47
+version=v13.6
+versionCode=48
 author=veez21
 description=Debloat your device Systemless-ly! With choices for debloating in Terminal Emulator for every device.
 minMagisk=1500

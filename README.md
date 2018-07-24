@@ -16,6 +16,11 @@
 
 ## Changelog
 
+### v13.6
+* Fix listing apps
+* Use pm uninstall to uninstall app updates (only when in ADB Shell or when selinux is permissive)
+* Fix exclude list installation
+* Misc improvements
 ### v13.5
 * Sort listed apps alphabetically
 * Misc improvements
