@@ -209,7 +209,7 @@ menu_list_system_app() {
 			sleep 1
 			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
 			$use_aapt && {
-				if $(dumpsys package $PKG | grep -qm1 UPDATED_SYSTEM_APP); then
+				if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
 					$use_cmd && {
 						echo " - App is updated, uninstalling updates"
 						pm uninstall $PKG
@@ -258,7 +258,7 @@ menu_list_system_priv-app() {
 			sleep 1
 			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
 			$use_aapt && {
-				if $(dumpsys package $PKG | grep -qm1 UPDATED_SYSTEM_APP); then
+				if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
 					$use_cmd && {
 						echo " - App is updated, uninstalling updates"
 						pm uninstall $PKG
@@ -307,7 +307,7 @@ menu_list_vendor_app() {
 			sleep 1
 			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
 			$use_aapt && {
-				if $(dumpsys package $PKG | grep -qm1 UPDATED_SYSTEM_APP); then
+				if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
 					$use_cmd && {
 						echo " - App is updated, uninstalling updates"
 						pm uninstall $PKG
@@ -489,7 +489,7 @@ case "$1" in
 			name[0]=${app_dir##*/}; get_app_name $app_dir 0 2>$LOG
 			echo "Uninstalling ${app_name[0]}" | tr '_' ' '
 			mktouch $MODDIR$app_dir/.replace ${app_name[0]}
-			if $(dumpsys package ${app_label[i]} | grep -qm1 UPDATED_SYSTEM_APP); then
+			if $(dumpsys package ${app_label[i]} | grep UPDATED_SYSTEM_APP >/dev/null); then
 				$use_cmd && {
 					echo " - App is updated, uninstalling updates"
 					pm uninstall $PKG
