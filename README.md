@@ -16,6 +16,9 @@
 
 ## Changelog
 
+### v13.6.1
+* Fix derp in listing apps
+* Misc improvements
 ### v13.6
 * Fix listing apps
 * Use pm uninstall to uninstall app updates (only when in ADB Shell or when selinux is permissive)
