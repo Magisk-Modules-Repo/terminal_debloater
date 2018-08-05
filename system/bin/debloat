@@ -206,7 +206,7 @@ menu_list_system_app() {
 		else
 			get_cfg ${app_name[i]}
 			echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
-			sleep 1
+			sleep 0.4
 			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
 			$use_aapt && {
 				if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
@@ -255,7 +255,7 @@ menu_list_system_priv-app() {
 		else
 			get_cfg ${app_name[i]}
 			echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
-			sleep 1
+			sleep 0.4
 			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
 			$use_aapt && {
 				if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
@@ -304,7 +304,7 @@ menu_list_vendor_app() {
 		else
 			get_cfg ${app_name[i]}
 			echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
-			sleep 1
+			sleep 0.4
 			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
 			$use_aapt && {
 				if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
@@ -350,7 +350,7 @@ menu_list_unin_app() {
 			exit
 		else
 			echo "Reinstalling ${G}${name_unin[i]}${N}" | tr '_' ' '
-			sleep 1
+			sleep 0.4
 			rm -rf ${unin_app[i]}
 		fi
 	done
