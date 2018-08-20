@@ -75,14 +75,14 @@ get_cfg() {
 
 get_app_name() {
 	if $use_aapt; then
-		app_name=$(aapt dump badging $1/${name[$2]}.apk 2>$LOG | grep 'application-label:' 2>/dev/null)
+		app_name=$(aapt dump badging $1/${apk_name[$2]} 2>$LOG | grep 'application-label:' 2>/dev/null)
 		if [ $? -gt 0 ]; then
 			app_name[$2]=${name[$2]}
 			return
 		fi
 		app_name=${app_name#*:}
 		app_name[$2]=$(echo $app_name | tr ' ' '_' | tr -d "'")
-		app_label=$(aapt dump badging $1/${name[$2]}.apk | grep package | head -n1)
+		app_label=$(aapt dump badging $1/${apk_name[$2]} | grep package | head -n1)
 		app_label=${app_label#*"'"}
 		app_label=${app_label%%"'"*}
 		app_label[$2]=$app_label
@@ -102,7 +102,7 @@ list_s-app() {
 		if [[ ! -d $MODDIR${listapp[x]} ]]; then
 			if ! grep -xqE -e "(app|priv-app|vendor/app)/${i}" $exclude_file; then
 				name[x]=${i}
-				apk_name[x]="${i}.apk"
+				apk_name[x]="$(basename $(find $SYSTEM/$type/$i -name "*.apk" -type f -mindepth 1))"
 				get_app_name ${listapp[x]} $x
 				echo "^=${app_name[x]}^=${listapp[x]}^=${app_label[x]}" >> $LISTFILE
 				x=$((x+1))
