@@ -205,22 +205,26 @@ menu_list_system_app() {
 			exit
 		else
 			get_cfg ${app_name[i]}
-			echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
-			sleep 0.4
-			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
-			$use_aapt && {
-				if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
-					$use_cmd && {
-						echo " - App is updated, uninstalling updates"
-						pm uninstall $PKG
-					} || {
-						echo " - App is updated, uninstall updates in Settings App"
-					}
-				fi
-			}
+			if grep -q -w $DIR_APP /proc/mounts; then
+				echo "$DIR_APP is mounted!"
+			else
+				echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
+				sleep 0.4
+				mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
+				$use_aapt && {
+					if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
+						$use_cmd && {
+							echo " - App is updated, uninstalling updates"
+							pm uninstall $PKG
+						} || {
+							echo " - App is updated, uninstall updates in Settings App"
+						}
+					fi
+				}
+				echo "Reboot to apply changes"
+			fi
 		fi
 	done
-	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
 	[ "$mchoice" == "y" ] && menu || exit
@@ -254,22 +258,26 @@ menu_list_system_priv-app() {
 			exit
 		else
 			get_cfg ${app_name[i]}
-			echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
-			sleep 0.4
-			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
-			$use_aapt && {
-				if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
-					$use_cmd && {
-						echo " - App is updated, uninstalling updates"
-						pm uninstall $PKG
-					} || {
-						echo " - App is updated, uninstall updates in Settings App"
-					}
-				fi
-			}
+			if grep -q -w $DIR_APP /proc/mounts; then
+				echo "$DIR_APP is mounted!"
+			else
+				echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
+				sleep 0.4
+				mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
+				$use_aapt && {
+					if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
+						$use_cmd && {
+							echo " - App is updated, uninstalling updates"
+							pm uninstall $PKG
+						} || {
+							echo " - App is updated, uninstall updates in Settings App"
+						}
+					fi
+				}
+				echo "Reboot to apply changes"
+			fi
 		fi
 	done
-	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
 	[ "$mchoice" == "y" ] && menu || exit
@@ -303,22 +311,26 @@ menu_list_vendor_app() {
 			exit
 		else
 			get_cfg ${app_name[i]}
-			echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
-			sleep 0.4
-			mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
-			$use_aapt && {
-				if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
-					$use_cmd && {
-						echo " - App is updated, uninstalling updates"
-						pm uninstall $PKG
-					} || {
-						echo " - App is updated, uninstall updates in Settings App"
-					}
-				fi
-			}
+			if grep -q -w $DIR_APP /proc/mounts; then
+				echo "$DIR_APP is mounted!"
+			else
+				echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
+				sleep 0.4
+				mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
+				$use_aapt && {
+					if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
+						$use_cmd && {
+							echo " - App is updated, uninstalling updates"
+							pm uninstall $PKG
+						} || {
+							echo " - App is updated, uninstall updates in Settings App"
+						}
+					fi
+				}
+				echo "Reboot to apply changes"
+			fi
 		fi
 	done
-	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
 	[ "$mchoice" == "y" ] && menu || exit
@@ -487,15 +499,19 @@ case "$1" in
 			[ -f $MODDIR$app_dir/.replace ] && echo "$i already uninstalled" && continue
 			echo "$i found in $app_dir"
 			name[0]=${app_dir##*/}; get_app_name $app_dir 0 2>$LOG
-			echo "Uninstalling ${app_name[0]}" | tr '_' ' '
-			mktouch $MODDIR$app_dir/.replace ${app_name[0]}
-			if $(dumpsys package ${app_label[i]} | grep UPDATED_SYSTEM_APP >/dev/null); then
-				$use_cmd && {
-					echo " - App is updated, uninstalling updates"
-					pm uninstall $PKG
-				} || {
-					echo " - App is updated, uninstall updates in Settings App"
-				}
+			if grep -q -w $app_dir /proc/mounts; then
+				echo "$DIR_APP is mounted!"
+			else
+				echo "Uninstalling ${app_name[0]}" | tr '_' ' '
+				mktouch $MODDIR$app_dir/.replace ${app_name[0]}
+				if $(dumpsys package ${app_label[i]} | grep UPDATED_SYSTEM_APP >/dev/null); then
+					$use_cmd && {
+						echo " - App is updated, uninstalling updates"
+						pm uninstall $PKG
+					} || {
+						echo " - App is updated, uninstall updates in Settings App"
+					}
+				fi
 			fi
 		done
 		$ok || abort "error: Use \"$_name -d -h\" for help"
