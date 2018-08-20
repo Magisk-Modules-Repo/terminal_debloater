@@ -206,7 +206,7 @@ menu_list_system_app() {
 		else
 			get_cfg ${app_name[i]}
 			if grep -q -w $DIR_APP /proc/mounts; then
-				echo "$DIR_APP is mounted!"
+				echo "Failed! $DIR_APP is mounted!"
 			else
 				echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
 				sleep 0.4
@@ -259,7 +259,7 @@ menu_list_system_priv-app() {
 		else
 			get_cfg ${app_name[i]}
 			if grep -q -w $DIR_APP /proc/mounts; then
-				echo "$DIR_APP is mounted!"
+				echo "Failed! $DIR_APP is mounted!"
 			else
 				echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
 				sleep 0.4
@@ -312,7 +312,7 @@ menu_list_vendor_app() {
 		else
 			get_cfg ${app_name[i]}
 			if grep -q -w $DIR_APP /proc/mounts; then
-				echo "$DIR_APP is mounted!"
+				echo "Failed! $DIR_APP is mounted!"
 			else
 				echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
 				sleep 0.4
@@ -500,7 +500,7 @@ case "$1" in
 			echo "$i found in $app_dir"
 			name[0]=${app_dir##*/}; get_app_name $app_dir 0 2>$LOG
 			if grep -q -w $app_dir /proc/mounts; then
-				echo "$DIR_APP is mounted!"
+				echo "Failed! $DIR_APP is mounted!"
 			else
 				echo "Uninstalling ${app_name[0]}" | tr '_' ' '
 				mktouch $MODDIR$app_dir/.replace ${app_name[0]}
