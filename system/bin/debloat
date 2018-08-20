@@ -222,10 +222,10 @@ menu_list_system_app() {
 						}
 					fi
 				}
-				echo "Reboot to apply changes"
 			fi
 		fi
 	done
+	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
 	[ "$mchoice" == "y" ] && menu || exit
@@ -275,10 +275,10 @@ menu_list_system_priv-app() {
 						}
 					fi
 				}
-				echo "Reboot to apply changes"
 			fi
 		fi
 	done
+	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
 	[ "$mchoice" == "y" ] && menu || exit
@@ -328,10 +328,10 @@ menu_list_vendor_app() {
 						}
 					fi
 				}
-				echo "Reboot to apply changes"
 			fi
 		fi
 	done
+	echo "Reboot to apply changes"
 	echo -n "Return to menu? < y | n >: "
 	read mchoice
 	[ "$mchoice" == "y" ] && menu || exit

@@ -16,6 +16,8 @@
 
 ## Changelog
 
+### v13.7.1
+* Fix app mounted detection
 ### v13.7
 * Detect if a system app is from another Magisk Module (or any other ways of mounting)
   This prevents conflicts between magisk modules like Terminal App Systemizer
