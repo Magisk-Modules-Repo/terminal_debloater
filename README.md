@@ -16,6 +16,11 @@
 
 ## Changelog
 
+### v13.7
+* Detect if a system app is from another Magisk Module (or any other ways of mounting)
+  This prevents conflicts between magisk modules like Terminal App Systemizer
+* Improve apk name detection
+* Misc improvements
 ### v13.6.1
 * Fix derp in listing apps
 * Misc improvements
