@@ -16,6 +16,8 @@
 
 ## Changelog
 
+### v13.7.3
+* Fix freezing when listing apps (fiatCurrency)
 ### v13.7.1
 * Fix app mounted detection
 ### v13.7
