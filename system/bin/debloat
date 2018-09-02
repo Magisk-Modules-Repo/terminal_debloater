@@ -110,7 +110,12 @@ list_s-app() {
 			fi
 		fi
 	done
-	u_app_name=($(echo "${app_name[@]}" | sed "s/'[^']*'//g")); app_name=()
+		# The below line removes everything upto and including the final single quote in the 
+		#	list of app names, treating it as a single string of space-sparated words
+		# Not sure where the quote mark comes from, but it needs to be eliminated, and
+		#	needs to be represented here in octal form.
+	u_app_name=($(echo "${app_name[@]}" | sed "s/.*\047//g")); app_name=()
+		# This line seems to convert that back into a traversable array of words
 	app_name=($(printf '%s\n' "${u_app_name[@]}" | sort -f))
 }
 
