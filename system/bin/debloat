@@ -67,6 +67,27 @@ MOUNT_LOOP=$(basename $(grep -m1 $MOUNTPATH /proc/mounts | awk '{print $1}'))
 [ $(getenforce) == "Permissive" ] && use_cmd=true || use_cmd=false
 [ $LOGNAME ] && use_cmd=true || use_cmd=false
 
+debloat_app() {
+	[ "$1" == "n" ] && shift || get_cfg $1
+	if grep -w $DIR_APP /proc/mounts | grep -q $MOUNT_LOOP; then
+		echo "Failed! $DIR_APP is mounted!"
+	else
+		echo "Uninstalling ${R}${1}${N} ($DIR_APP)" | tr '_' ' '
+		sleep 0.4
+		mktouch $MODDIR$DIR_APP/.replace ${1}
+		$use_aapt && {
+			if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
+				$use_cmd && {
+					echo " - App is updated, uninstalling updates"
+					pm uninstall $PKG
+				} || {
+					echo " - App is updated, uninstall updates in Settings App"
+				}
+			fi
+		}
+	fi
+}
+
 get_cfg() {
 	APP_NAME=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $1}')
 	DIR_APP=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}')
@@ -75,18 +96,18 @@ get_cfg() {
 }
 
 get_app_name() {
+	apk_dir=$(echo ${1}/${apk_name[$2]})
 	if $use_aapt; then
-		app_name=$(aapt dump badging $1/${apk_name[$2]} 2>$LOG | grep 'application-label:' 2>/dev/null)
+		app_name=$(aapt dump badging $apk_dir 2>>$LOG | grep 'application-label:' 2>/dev/null)
 		if [ $? -gt 0 ]; then
 			app_name[$2]=${name[$2]}
 			return
 		fi
 		app_name=${app_name#*:}
 		app_name[$2]=$(echo $app_name | tr ' ' '_' | tr -d "'")
-		app_label=$(aapt dump badging $1/${apk_name[$2]} | grep package | head -n1)
+		app_label=$(aapt dump badging $apk_dir | grep package | head -n1)
 		app_label=${app_label#*"'"}
-		app_label=${app_label%%"'"*}
-		app_label[$2]=$app_label
+		app_label[$2]=${app_label%%"'"*}
 	else
 		app_name[$2]=${name[$2]}
 	fi
@@ -210,24 +231,7 @@ menu_list_system_app() {
 		elif [ "$i" == "0" ]; then
 			exit
 		else
-			get_cfg ${app_name[i]}
-			if grep -w $DIR_APP /proc/mounts | grep -q $MOUNT_LOOP; then
-				echo "Failed! $DIR_APP is mounted!"
-			else
-				echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
-				sleep 0.4
-				mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
-				$use_aapt && {
-					if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
-						$use_cmd && {
-							echo " - App is updated, uninstalling updates"
-							pm uninstall $PKG
-						} || {
-							echo " - App is updated, uninstall updates in Settings App"
-						}
-					fi
-				}
-			fi
+			debloat_app ${app_name[i]}
 		fi
 	done
 	echo "Reboot to apply changes"
@@ -263,24 +267,7 @@ menu_list_system_priv-app() {
 		elif [ "$i" == "0" ]; then
 			exit
 		else
-			get_cfg ${app_name[i]}
-			if grep -w $DIR_APP /proc/mounts | grep -q $MOUNT_LOOP; then
-				echo "Failed! $DIR_APP is mounted!"
-			else
-				echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
-				sleep 0.4
-				mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
-				$use_aapt && {
-					if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
-						$use_cmd && {
-							echo " - App is updated, uninstalling updates"
-							pm uninstall $PKG
-						} || {
-							echo " - App is updated, uninstall updates in Settings App"
-						}
-					fi
-				}
-			fi
+			debloat_app ${app_name[i]}
 		fi
 	done
 	echo "Reboot to apply changes"
@@ -316,24 +303,7 @@ menu_list_vendor_app() {
 		elif [ "$i" == "0" ]; then
 			exit
 		else
-			get_cfg ${app_name[i]}
-			if grep -w $DIR_APP /proc/mounts | grep -q $MOUNT_LOOP; then
-				echo "Failed! $DIR_APP is mounted!"
-			else
-				echo "Uninstalling ${R}${app_name[i]}${N} ($DIR_APP)" | tr '_' ' '
-				sleep 0.4
-				mktouch $MODDIR$DIR_APP/.replace ${app_name[i]}
-				$use_aapt && {
-					if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
-						$use_cmd && {
-							echo " - App is updated, uninstalling updates"
-							pm uninstall $PKG
-						} || {
-							echo " - App is updated, uninstall updates in Settings App"
-						}
-					fi
-				}
-			fi
+			debloat_app ${app_name[i]}
 		fi
 	done
 	echo "Reboot to apply changes"
@@ -492,9 +462,9 @@ case "$1" in
 		}
 		for i in "$@"; do
 			d_app_label=$(dumpsys package $i | grep "path:")
-			[ $? -gt 0 ] && app_dir=$(find $SYSTEM/app $SYSTEM/priv-app $SYSTEM/vendor/app -name $i -type d) || app_dir=$(echo $d_app_label | sed 's/.*path: //;s/\(.*\)\/.*/\1/')
-			[ ! "$app_dir" ] && { echo "$i doesn't exist in $SYSTEM"; ok=false; continue; } || {
-				[ $(echo $app_dir | grep "/system") ] && {
+			[ $? -gt 0 ] && DIR_APP=$(find $SYSTEM/app $SYSTEM/priv-app $SYSTEM/vendor/app -name $i -type d -mindepth 1) || DIR_APP=$(echo $d_app_label | sed 's/.*path: //;s/\(.*\)\/.*/\1/')
+			[ ! "$DIR_APP" ] && { echo "$i doesn't exist in $SYSTEM"; ok=false; continue; } || {
+				[ $(echo $DIR_APP | grep "/system") ] && {
 					ok=true
 				} || {
 					echo "$i is not a system app"
@@ -502,23 +472,10 @@ case "$1" in
 					continue
 				}
 			}
-			[ -f $MODDIR$app_dir/.replace ] && echo "$i already uninstalled" && continue
-			echo "$i found in $app_dir"
-			name[0]=${app_dir##*/}; get_app_name $app_dir 0 2>$LOG
-			if grep -w $app_dir /proc/mounts | grep -q $MOUNT_LOOP; then
-				echo "Failed! $DIR_APP is mounted!"
-			else
-				echo "Uninstalling ${app_name[0]}" | tr '_' ' '
-				mktouch $MODDIR$app_dir/.replace ${app_name[0]}
-				if $(dumpsys package ${app_label[i]} | grep UPDATED_SYSTEM_APP >/dev/null); then
-					$use_cmd && {
-						echo " - App is updated, uninstalling updates"
-						pm uninstall $PKG
-					} || {
-						echo " - App is updated, uninstall updates in Settings App"
-					}
-				fi
-			fi
+			[ -f $MODDIR$DIR_APP/.replace ] && echo "$i already uninstalled" && continue
+			echo "$i found in $DIR_APP"
+			name[0]=${DIR_APP##*/}; apk_name[0]="$(basename $(find $DIR_APP -name "*.apk" -type f -mindepth 1))"; get_app_name $DIR_APP 0; PKG=${app_label[0]}
+			debloat_app n ${app_name[0]}
 		done
 		$ok || abort "error: Use \"$_name -d -h\" for help"
 		exit;;
