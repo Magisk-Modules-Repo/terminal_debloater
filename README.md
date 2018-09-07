@@ -16,6 +16,9 @@
 
 ## Changelog
 
+### v13.8
+* Display app label when listing apps
+* Misc improvements
 ### v13.7.3
 * Fix freezing when listing apps (fiatCurrency)
 ### v13.7.1
