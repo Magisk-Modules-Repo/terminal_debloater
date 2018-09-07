@@ -214,7 +214,8 @@ menu_list_system_app() {
 	echo ""
 	c=1
 	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		echo " $c - $(echo ${W}${app_name[i]}${N} | tr '_' ' ')"
+		detect_app_label=$(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $3}')
+		printf "%s %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_label" ]  && echo "(${Bl}$detect_app_label${N})") | tr '_' ' '
 		c=$((c+1))
 	done
 	echo ""
@@ -250,7 +251,8 @@ menu_list_system_priv-app() {
 	echo ""
 	c=1
 	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		echo " $c - $(echo ${W}${app_name[i]}${N} | tr '_' ' ')"
+		detect_app_label=$(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $3}')
+		printf "%s %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_label" ]  && echo "(${Bl}$detect_app_label${N})") | tr '_' ' '
 		c=$((c+1))
 	done
 	echo ""
@@ -286,7 +288,8 @@ menu_list_vendor_app() {
 	echo ""
 	c=1
 	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		echo " $c - $(echo ${W}${app_name[i]}${N} | tr '_' ' ')"
+		detect_app_label=$(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $3}')
+		printf "%s %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_label" ]  && echo "(${Bl}$detect_app_label${N})") | tr '_' ' '
 		c=$((c+1))
 	done
 	echo ""
