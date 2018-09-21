@@ -107,7 +107,7 @@ get_app_name() {
 			return
 		fi
 		app_name=${app_name#*:}
-		app_name[$2]=$(echo $app_name | tr ' ' '_' | tr -d "'")
+		app_name[$2]=$(echo $app_name | tr ' ' '_' | sed "s/'//1;s/\(.*\)'/\1/")
 		app_label=$(aapt dump badging $apk_dir | grep package | head -n1)
 		app_label=${app_label#*"'"}
 		app_label[$2]=${app_label%%"'"*}
@@ -134,12 +134,7 @@ list_s-app() {
 			fi
 		fi
 	done
-		# The below line removes everything upto and including the final single quote in the 
-		#	list of app names, treating it as a single string of space-sparated words
-		# Not sure where the quote mark comes from, but it needs to be eliminated, and
-		#	needs to be represented here in octal form.
 	u_app_name=($(echo "${app_name[@]}" | sed "s/.*\047//g")); app_name=()
-		# This line seems to convert that back into a traversable array of words
 	app_name=($(printf '%s\n' "${u_app_name[@]}" | sort -f))
 }
 
@@ -217,12 +212,12 @@ menu_list_system_app() {
 	echo ""
 	c=1
 	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		detect_app_label=$(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $3}')
-		printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_label" ]  && echo "(${Bl}$detect_app_label${N})") | tr '_' ' '
+		detect_app_dir=$(basename $(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}') 2>/dev/null)
+		printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_dir" ]  && echo "(${Bl}$detect_app_dir${N})") | tr '_' ' '
 		c=$((c+1))
 	done
 	echo ""
-	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
+	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
 	echo " x - ${Bl}Back to Menu${N}"
 	echo " 0 - ${Bl}Exit${N}"
 	echo "$div"
@@ -254,12 +249,12 @@ menu_list_system_priv-app() {
 	echo ""
 	c=1
 	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		detect_app_label=$(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $3}')
-		printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_label" ]  && echo "(${Bl}$detect_app_label${N})") | tr '_' ' '
+		detect_app_dir=$(basename $(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}'))
+		printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_dir" ]  && echo "(${Bl}$detect_app_dir${N})") | tr '_' ' '
 		c=$((c+1))
 	done
 	echo ""
-	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
+	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
 	echo " x - ${Bl}Back to Menu${N}"
 	echo " 0 - ${Bl}Exit${N}"
 	echo "$div"
@@ -291,12 +286,12 @@ menu_list_vendor_app() {
 	echo ""
 	c=1
 	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		detect_app_label=$(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $3}')
-		printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_label" ]  && echo "(${Bl}$detect_app_label${N})") | tr '_' ' '
+		detect_app_dir=$(basename $(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}'))
+		printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_dir" ]  && echo "(${Bl}$detect_app_dir${N})") | tr '_' ' '
 		c=$((c+1))
 	done
 	echo ""
-	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 $(echo ${#app_name[$((${#app_name[@]}/3))]}) $(echo ${#app_name[$((${#app_name[@]}/2))]})\""
+	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
 	echo " x - ${Bl}Back to Menu${N}"
 	echo " 0 - ${Bl}Exit${N}"
 	echo "$div"
@@ -330,7 +325,7 @@ menu_list_unin_app() {
 	echo ""
 	list_unin_app
 	echo ""
-	echo " ${Bl}To reinstall multiple apps, enter multiple numbers. Example:${N} \"1 $(echo ${#name_unin[$((${#name_unin[@]}/3))]}) $(echo ${#name_unin[$((${#name_unin[@]}/2))]})\""
+	echo " ${Bl}To reinstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
 	echo " x - ${Bl}Back to Menu${N}"
 	echo " 0 - ${Bl}Exit${N}"
 	echo ""
@@ -356,8 +351,8 @@ menu_list_unin_app() {
 }
 
 menu() {
-	[ -n "$(find $MODDIR$SYSTEM2/app -name ".replace" -type f 2>$LOG)" ] &&  show_rein=true
-	[ -n "$(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f 2>$LOG)" ] &&  show_rein=true
+	[ -n "$(find $MODDIR$SYSTEM2/app -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
+	[ -n "$(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
 	mod_head
 	echo ""
 	[ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
@@ -373,66 +368,58 @@ menu() {
 	echo ""
 	echo -n "[CHOICE]: "
 	read choice
-	if [ "$choice" == "1" ]; then
-		if [ -d $SYSTEM/app ]; then
-			menu_list_system_app
-		else
-			abort Invalid
-		fi
-	elif [ "$choice" == 2 ]; then
-		if [ -d $SYSTEM/priv-app ]; then
-			menu_list_system_priv-app
-		else
-			abort Invalid
-		fi
-	elif [ "$choice" == 3 ]; then
-		if [ -d $SYSTEM/vendor/app ]; then
-			menu_list_vendor_app
-		else
-			abort Invalid
-		fi
-	elif [ "$choice" == 4 ]; then
-		if $show_rein; then
-			menu_list_unin_app
-		else
-			abort "Invalid"
-		fi
-	elif [ "$choice" == "e" ]; then
-		if $show_rein; then
-			clear
-			echo "Exporting to ${W}$import_file...${N}"
-			sleep 0.4
-			clear
-			export_list
-			echo "Done"
-			echo -n "Return to menu? < y | n >: "
-			read mchoice
-			[ "$mchoice" == "y" ] && menu || exit
-		else
-			abort "Invalid"
-		fi
-	elif [ "$choice" == "i" ]; then
-		if [ -f $import_file ]; then
-			clear
-			echo "Importing from ${W}$import_file...${N}"
-			sleep 0.4
-			import_list
-			echo "Done"
-			echo -n "Return to menu? < y | n >: "
-			read mchoice
-			[ "$mchoice" == "y" ] && menu || exit
-		else
-			abort "Invalid"
-		fi
+	case "$choice" in
+		1)	if [ -d $SYSTEM/app ]; then
+				menu_list_system_app
+			else
+				abort Invalid
+			fi;;
+		2)	if [ -d $SYSTEM/priv-app ]; then
+				menu_list_system_priv-app
+			else
+				abort Invalid
+			fi;;
+		3)	if [ -d $SYSTEM/vendor/app ]; then
+				menu_list_vendor_app
+			else
+				abort Invalid
+			fi;;
+		4)	if $show_rein; then
+				menu_list_unin_app
+			else
+				abort Invalid
+			fi;;
+		e|E)if $show_rein; then
+				clear
+				echo "Exporting to ${W}$import_file...${N}"
+				sleep 0.4
+				clear
+				export_list
+				echo "Done"
+				echo -n "Return to menu? < y | n >: "
+				read mchoice
+				[ "$mchoice" == "y" ] && menu || exit
+			else
+				abort Invalid
+			fi;;
+		i|I)if [ -f $import_file ]; then
+				clear
+				echo "Importing from ${W}$import_file...${N}"
+				sleep 0.4
+				import_list
+				echo "Done"
+				echo -n "Return to menu? < y | n >: "
+				read mchoice
+				[ "$mchoice" == "y" ] && menu || exit
+			else
+				abort "Invalid"
+			fi;;
 
-	elif [ "$choice" == "d" -o "$choice" == "D" ]; then
-		am start https://paypal.me/veez21 >/dev/null
-	elif [ "$choice" == "logs" ]; then
-		upload_logs
-	elif [ "$choice" == "0" ]; then
-		exit
-	else abort Invalid
-	fi
+		d|D)	am start https://paypal.me/veez21 >/dev/null;;
+		logs)	upload_logs;;
+		0)	exit;;
+		*)	abort Invalid;;
+	esac
 }
 
 case "$1" in
