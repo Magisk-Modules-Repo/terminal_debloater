@@ -118,7 +118,7 @@ get_app_name() {
 }
 
 list_s-app() {
-	rm $LISTFILE 2>$LOG; app_name=(); listapp=()
+	rm $LISTFILE 2>>$LOG; app_name=(); listapp=()
 	x=1
 	type=$1
 	sapp=($(ls $SYSTEM/$type))
