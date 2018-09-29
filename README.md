@@ -7,6 +7,10 @@
 
 	debloat
 	
+or
+
+	debloat -h
+	
  And you will be presented with a list of apps inside /system.
  Just reboot and you will have it removed, systemless-ly
  
@@ -16,6 +20,9 @@
 
 ## Changelog
 
+### v13.8.2
+* Display app folder in system instead of app label when listing apps
+* Misc improvements
 ### v13.8
 * Display app label when listing apps
 * Misc improvements
