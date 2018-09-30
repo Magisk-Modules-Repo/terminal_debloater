@@ -14,8 +14,8 @@ _name=$(basename $0)
 MOUNTPATH=/sbin/.core/img
 MODDIR="$MOUNTPATH/$ID"
 if [ ! -d $MODDIR ]; then
-	echo "Module not detected!"
-	exit 1
+  echo "Module not detected!"
+  exit 1
 fi
 
 # Set Log Files
@@ -41,13 +41,13 @@ set -x 2>$VERLOG
 # > Rather than editing the default vars above.
 
 help_me() {
-	cat << EOF
+  cat << EOF
 $MODTITLE $VER($REL)
 by $AUTHOR
-	
+
 Usage: $_name
    or: $_name [options]...
-   
+
 Options:
     -nc                              removes ANSI escape codes
     -l [app|priv-app|vendor]         list system apps
@@ -72,408 +72,408 @@ MOUNT_LOOP=$(basename $(grep -m1 $MOUNTPATH /proc/mounts | awk '{print $1}'))
 [ $LOGNAME ] && use_cmd=true || use_cmd=false
 
 debloat_app() {
-	[ "$1" == "n" ] && shift || get_cfg $1
-	if grep -w $DIR_APP /proc/mounts | grep -q $MOUNT_LOOP; then
-		echo "Failed! $DIR_APP is mounted (by another Magisk Module)!"
-	else
-		echo "Uninstalling ${R}${1}${N} ($DIR_APP)" | tr '_' ' '
-		sleep 0.4
-		mktouch $MODDIR$DIR_APP/.replace ${1}
-		$use_aapt && {
-			if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
-				$use_cmd && {
-					echo " - App is updated, uninstalling updates"
-					pm uninstall $PKG
-				} || {
-					echo " - App is updated, uninstall updates in Settings App"
-				}
-			fi
-		}
-	fi
+  [ "$1" == "n" ] && shift || get_cfg $1
+  if grep -w $DIR_APP /proc/mounts | grep -q $MOUNT_LOOP; then
+    echo "Failed! $DIR_APP is mounted (by another Magisk Module)!"
+  else
+    echo "Uninstalling ${R}${1}${N} ($DIR_APP)" | tr '_' ' '
+    sleep 0.4
+    mktouch $MODDIR$DIR_APP/.replace ${1}
+    $use_aapt && {
+      if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
+        $use_cmd && {
+          echo " - App is updated, uninstalling updates"
+          pm uninstall $PKG
+        } || {
+          echo " - App is updated, uninstall updates in Settings App"
+        }
+      fi
+    }
+  fi
 }
 
 get_cfg() {
-	APP_NAME=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $1}')
-	DIR_APP=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}')
-	PKG=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $3}')
-	[ $? -gt 0 ] && abort "Package doesn't exist!"
+  APP_NAME=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $1}')
+  DIR_APP=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}')
+  PKG=$(grep -wm1 "=${1}^" $LISTFILE | tr '^=' ' ' | awk '{print $3}')
+  [ $? -gt 0 ] && abort "Package doesn't exist!"
 }
 
 get_app_name() {
-	apk_dir=$(echo ${1}/${apk_name[$2]})
-	if $use_aapt; then
-		app_name=$(aapt dump badging $apk_dir 2>>$LOG | grep 'application-label:' 2>/dev/null)
-		if [ $? -gt 0 ]; then
-			app_name[$2]=${name[$2]}
-			return
-		fi
-		app_name=${app_name#*:}
-		app_name[$2]=$(echo $app_name | tr ' ' '_' | sed "s/'//1;s/\(.*\)'/\1/")
-		app_label=$(aapt dump badging $apk_dir | grep package | head -n1)
-		app_label=${app_label#*"'"}
-		app_label[$2]=${app_label%%"'"*}
-	else
-		app_name[$2]=${name[$2]}
-	fi
+  apk_dir=$(echo ${1}/${apk_name[$2]})
+  if $use_aapt; then
+    app_name=$(aapt dump badging $apk_dir 2>>$LOG | grep 'application-label:' 2>/dev/null)
+    if [ $? -gt 0 ]; then
+      app_name[$2]=${name[$2]}
+      return
+    fi
+    app_name=${app_name#*:}
+    app_name[$2]=$(echo $app_name | tr ' ' '_' | sed "s/'//1;s/\(.*\)'/\1/")
+    app_label=$(aapt dump badging $apk_dir | grep package | head -n1)
+    app_label=${app_label#*"'"}
+    app_label[$2]=${app_label%%"'"*}
+  else
+    app_name[$2]=${name[$2]}
+  fi
 }
 
 list_s-app() {
-	rm $LISTFILE 2>>$LOG; app_name=(); listapp=()
-	x=1
-	type=$1
-	sapp=($(ls $SYSTEM/$type))
-	for i in ${sapp[@]}; do
-		ProgressBar $x ${#sapp[@]}
-		listapp[x]=$SYSTEM2/$type/$i
-		if [[ ! -d $MODDIR${listapp[x]} ]]; then
-			if ! grep -xqE -e "(app|priv-app|vendor/app)/${i}" $exclude_file; then
-				name[x]=${i}
-				apk_name[x]="$(basename $(find $SYSTEM/$type/$i -name "*.apk" -type f -mindepth 1))"
-				get_app_name ${listapp[x]} $x
-				echo "^=${app_name[x]}^=${listapp[x]}^=${app_label[x]}" >> $LISTFILE
-				x=$((x+1))
-			fi
-		fi
-	done
-	u_app_name=($(echo "${app_name[@]}" | sed "s/.*\047//g")); app_name=()
-	app_name=($(printf '%s\n' "${u_app_name[@]}" | sort -f))
+  rm $LISTFILE 2>>$LOG; app_name=(); listapp=()
+  x=1
+  type=$1
+  sapp=($(ls $SYSTEM/$type))
+  for i in ${sapp[@]}; do
+    ProgressBar $x ${#sapp[@]}
+    listapp[x]=$SYSTEM2/$type/$i
+    if [[ ! -d $MODDIR${listapp[x]} ]]; then
+      if ! grep -xqE -e "(app|priv-app|vendor/app)/${i}" $exclude_file; then
+        name[x]=${i}
+        apk_name[x]="$(basename $(find $SYSTEM/$type/$i -name "*.apk" -type f -mindepth 1))"
+        get_app_name ${listapp[x]} $x
+        echo "^=${app_name[x]}^=${listapp[x]}^=${app_label[x]}" >> $LISTFILE
+        x=$((x+1))
+      fi
+    fi
+  done
+  u_app_name=($(echo "${app_name[@]}" | sed "s/.*\047//g")); app_name=()
+  app_name=($(printf '%s\n' "${u_app_name[@]}" | sort -f))
 }
 
 list_unin_app() {
-	c=1
-	if [ -d $SYSTEM/app ] && [ -d $MODDIR$SYSTEM2/app ]; then
-		for i in $(ls $MODDIR$SYSTEM2/app); do
-			unin_app[c]=$MODDIR$SYSTEM2/app/$i
-			name_unin[c]=$(cat $MODDIR$SYSTEM2/app/$i/.replace)
-			if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/app/$i/.replace) ]]; then
-				name_unin[c]=$i
-			fi
-			echo " $c - ${W}${name_unin[c]}${N}" | tr '_' ' '
-			c=$((c+1))
-		done
-	fi
-	if [ -d $SYSTEM/priv-app ] && [ -d $MODDIR$SYSTEM2/priv-app ]; then
-		for i in $(ls $MODDIR$SYSTEM2/priv-app); do
-			unin_app[c]=$MODDIR$SYSTEM2/priv-app/$i
-			name_unin[c]=$(cat $MODDIR$SYSTEM2/priv-app/$i/.replace)
-			if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/priv-app/$i/.replace) ]]; then
-				name_unin[c]=$i
-			fi
-			echo " $c - ${W}${name_unin[c]}${N}" | tr '_' ' '
-			c=$((c+1))
-		done
-	fi
-	if [ -d $SYSTEM/vendor/app ] && [ -d $MODDIR$SYSTEM2/vendor/app ]; then
-		for i in $(ls $MODDIR$SYSTEM2/vendor/app); do
-			unin_app[c]=$MODDIR$SYSTEM2/vendor/app/$i
-			name_unin[c]=$(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace)
-			if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace) ]]; then
-				name_unin[c]=$i
-			fi
-			echo " $c - ${W}${name_unin[c]}${N}" | tr '_' ' '
-			c=$((c+1))
-		done
-	fi
+  c=1
+  if [ -d $SYSTEM/app ] && [ -d $MODDIR$SYSTEM2/app ]; then
+    for i in $(ls $MODDIR$SYSTEM2/app); do
+      unin_app[c]=$MODDIR$SYSTEM2/app/$i
+      name_unin[c]=$(cat $MODDIR$SYSTEM2/app/$i/.replace)
+      if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/app/$i/.replace) ]]; then
+        name_unin[c]=$i
+      fi
+      echo " $c - ${W}${name_unin[c]}${N}" | tr '_' ' '
+      c=$((c+1))
+    done
+  fi
+  if [ -d $SYSTEM/priv-app ] && [ -d $MODDIR$SYSTEM2/priv-app ]; then
+    for i in $(ls $MODDIR$SYSTEM2/priv-app); do
+      unin_app[c]=$MODDIR$SYSTEM2/priv-app/$i
+      name_unin[c]=$(cat $MODDIR$SYSTEM2/priv-app/$i/.replace)
+      if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/priv-app/$i/.replace) ]]; then
+        name_unin[c]=$i
+      fi
+      echo " $c - ${W}${name_unin[c]}${N}" | tr '_' ' '
+      c=$((c+1))
+    done
+  fi
+  if [ -d $SYSTEM/vendor/app ] && [ -d $MODDIR$SYSTEM2/vendor/app ]; then
+    for i in $(ls $MODDIR$SYSTEM2/vendor/app); do
+      unin_app[c]=$MODDIR$SYSTEM2/vendor/app/$i
+      name_unin[c]=$(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace)
+      if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace) ]]; then
+        name_unin[c]=$i
+      fi
+      echo " $c - ${W}${name_unin[c]}${N}" | tr '_' ' '
+      c=$((c+1))
+    done
+  fi
 }
 
 import_list() {
-	[ "$1" ] && import_file=$1
-	if [ -f $import_file ] && (grep -q "$MODDIR" $import_file); then
-		c=1
-		import_apps=($(cat $import_file))
-		for i in ${import_apps[@]}; do
-			name[c]=${i##*/}
-			sys_dir=${i#*${MODDIR}}
-			get_app_name $sys_dir $c
-			mktouch $i/.replace ${app_name[c]}
-			echo "${W}${app_name[c]}${N} - Imported"
-			c=$((c+1))
-		done
-	else
-		echo "Invalid file"
-	fi
+  [ "$1" ] && import_file=$1
+  if [ -f $import_file ] && (grep -q "$MODDIR" $import_file); then
+    c=1
+    import_apps=($(cat $import_file))
+    for i in ${import_apps[@]}; do
+      name[c]=${i##*/}
+      sys_dir=${i#*${MODDIR}}
+      get_app_name $sys_dir $c
+      mktouch $i/.replace ${app_name[c]}
+      echo "${W}${app_name[c]}${N} - Imported"
+      c=$((c+1))
+    done
+  else
+    echo "Invalid file"
+  fi
 }
 
 export_list() {
-	[ "$1" ] && import_file=$1
-	mktouch $import_file
-	for i in $(find $MODDIR/system -name ".replace" -type f); do
-		echo ${i%/*} >> $import_file
-		echo "$(cat $i) - Exported"
-	done
+  [ "$1" ] && import_file=$1
+  mktouch $import_file
+  for i in $(find $MODDIR/system -name ".replace" -type f); do
+    echo ${i%/*} >> $import_file
+    echo "$(cat $i) - Exported"
+  done
 }
 
 menu_list_system_app() {
-	clear
-	list_s-app app 2>>$LOG
-	clear
-	echo "$div"
-	title_div "System Apps"
-	echo "$div"
-	echo ""
-	c=1
-	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		detect_app_dir=$(basename $(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}') 2>/dev/null)
-		printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_dir" ]  && echo "(${Bl}$detect_app_dir${N})") | tr '_' ' '
-		c=$((c+1))
-	done
-	echo ""
-	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
-	echo " x - ${Bl}Back to Menu${N}"
-	echo " 0 - ${Bl}Exit${N}"
-	echo "$div"
-	echo -n "[CHOICE]: "
-	read app
-	[ "$app" == "x" ] && menu
-	for i in $app; do
-		if [ "$i" -gt "${#listapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
-			echo "$i - Invalid"; false
-		elif [ "$i" == "0" ]; then
-			exit
-		else
-			debloat_app ${app_name[i]}
-		fi
-	done
-	echo "Reboot to apply changes"
-	echo -n "Return to menu? < y | n >: "
-	read mchoice
-	[ "$mchoice" == "y" ] && menu || exit
+  clear
+  list_s-app app 2>>$LOG
+  clear
+  echo "$div"
+  title_div "System Apps"
+  echo "$div"
+  echo ""
+  c=1
+  for i in $(seq 1 $((${#app_name[@]}-1))); do
+    detect_app_dir=$(basename $(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}') 2>/dev/null)
+    printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_dir" ]  && echo "(${Bl}$detect_app_dir${N})") | tr '_' ' '
+    c=$((c+1))
+  done
+  echo ""
+  echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
+  echo " x - ${Bl}Back to Menu${N}"
+  echo " 0 - ${Bl}Exit${N}"
+  echo "$div"
+  echo -n "[CHOICE]: "
+  read app
+  [ "$app" == "x" ] && menu
+  for i in $app; do
+    if [ "$i" -gt "${#listapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+      echo "$i - Invalid"; false
+    elif [ "$i" == "0" ]; then
+      exit
+    else
+      debloat_app ${app_name[i]}
+    fi
+  done
+  echo "Reboot to apply changes"
+  echo -n "Return to menu? < y | n >: "
+  read mchoice
+  [ "$mchoice" == "y" ] && menu || exit
 }
 
 menu_list_system_priv-app() {
-	clear
-	list_s-app priv-app 2>>$LOG
-	clear
-	echo "$div"
-	title_div "System Priv-Apps"
-	echo "$div"
-	echo ""
-	c=1
-	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		detect_app_dir=$(basename $(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}'))
-		printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_dir" ]  && echo "(${Bl}$detect_app_dir${N})") | tr '_' ' '
-		c=$((c+1))
-	done
-	echo ""
-	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
-	echo " x - ${Bl}Back to Menu${N}"
-	echo " 0 - ${Bl}Exit${N}"
-	echo "$div"
-	echo -n "[CHOICE]: "
-	read privapp
-	[ "$privapp" == "x" ] && menu
-	for i in $privapp; do
-		if [ "$i" -gt "${#listapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
-			echo "$i - Invalid"; false
-		elif [ "$i" == "0" ]; then
-			exit
-		else
-			debloat_app ${app_name[i]}
-		fi
-	done
-	echo "Reboot to apply changes"
-	echo -n "Return to menu? < y | n >: "
-	read mchoice
-	[ "$mchoice" == "y" ] && menu || exit
+  clear
+  list_s-app priv-app 2>>$LOG
+  clear
+  echo "$div"
+  title_div "System Priv-Apps"
+  echo "$div"
+  echo ""
+  c=1
+  for i in $(seq 1 $((${#app_name[@]}-1))); do
+    detect_app_dir=$(basename $(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}'))
+    printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_dir" ]  && echo "(${Bl}$detect_app_dir${N})") | tr '_' ' '
+    c=$((c+1))
+  done
+  echo ""
+  echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
+  echo " x - ${Bl}Back to Menu${N}"
+  echo " 0 - ${Bl}Exit${N}"
+  echo "$div"
+  echo -n "[CHOICE]: "
+  read privapp
+  [ "$privapp" == "x" ] && menu
+  for i in $privapp; do
+    if [ "$i" -gt "${#listapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+      echo "$i - Invalid"; false
+    elif [ "$i" == "0" ]; then
+      exit
+    else
+      debloat_app ${app_name[i]}
+    fi
+  done
+  echo "Reboot to apply changes"
+  echo -n "Return to menu? < y | n >: "
+  read mchoice
+  [ "$mchoice" == "y" ] && menu || exit
 }
 
 menu_list_vendor_app() {
-	clear
-	list_s-app vendor/app 2>>$LOG
-	clear
+  clear
+  list_s-app vendor/app 2>>$LOG
+  clear
     echo "$div"
-	title_div "Vendor Apps"
-	echo "$div"
-	echo ""
-	c=1
-	for i in $(seq 1 $((${#app_name[@]}-1))); do
-		detect_app_dir=$(basename $(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}'))
-		printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_dir" ]  && echo "(${Bl}$detect_app_dir${N})") | tr '_' ' '
-		c=$((c+1))
-	done
-	echo ""
-	echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
-	echo " x - ${Bl}Back to Menu${N}"
-	echo " 0 - ${Bl}Exit${N}"
-	echo "$div"
-	echo -n "[CHOICE]: "
-	read vapp
-	[ "$vapp" == "x" ] && menu
-	for i in $app; do
-		if [ "$i" -gt "${#listapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
-			echo "$i - Invalid"; false
-		elif [ "$i" == "0" ]; then
-			exit
-		else
-			debloat_app ${app_name[i]}
-		fi
-	done
-	echo "Reboot to apply changes"
-	echo -n "Return to menu? < y | n >: "
-	read mchoice
-	[ "$mchoice" == "y" ] && menu || exit
+  title_div "Vendor Apps"
+  echo "$div"
+  echo ""
+  c=1
+  for i in $(seq 1 $((${#app_name[@]}-1))); do
+    detect_app_dir=$(basename $(grep -wm1 "=${app_name[i]}^" $LISTFILE | tr '^=' ' ' | awk '{print $2}'))
+    printf "%b %s\n" " $c - ${W}${app_name[i]}${N}" $([ -n "$detect_app_dir" ]  && echo "(${Bl}$detect_app_dir${N})") | tr '_' ' '
+    c=$((c+1))
+  done
+  echo ""
+  echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
+  echo " x - ${Bl}Back to Menu${N}"
+  echo " 0 - ${Bl}Exit${N}"
+  echo "$div"
+  echo -n "[CHOICE]: "
+  read vapp
+  [ "$vapp" == "x" ] && menu
+  for i in $app; do
+    if [ "$i" -gt "${#listapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+      echo "$i - Invalid"; false
+    elif [ "$i" == "0" ]; then
+      exit
+    else
+      debloat_app ${app_name[i]}
+    fi
+  done
+  echo "Reboot to apply changes"
+  echo -n "Return to menu? < y | n >: "
+  read mchoice
+  [ "$mchoice" == "y" ] && menu || exit
 }
 
 menu_list_unin_app() {
-	clear
-	echo "$div"
-	title_div "Reinstall"
-	echo " You can also just delete your selected
+  clear
+  echo "$div"
+  title_div "Reinstall"
+  echo " You can also just delete your selected
  folders in $MODDIR$SYSTEM2/app or priv-app."
-	echo " The apps debloated were reset
+  echo " The apps debloated were reset
  to their factory version."
-	echo "$div"
-	echo ""
-	list_unin_app
-	echo ""
-	echo " ${Bl}To reinstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
-	echo " x - ${Bl}Back to Menu${N}"
-	echo " 0 - ${Bl}Exit${N}"
-	echo ""
-	echo -n "[CHOICE]: "
-	read rein
-	[ "$rein" == "x" ] && menu
-	for i in $rein; do
-		if [ "$i" -gt ${#name_unin[@]} ] || [ "$i" -lt 0 ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
-			echo "Invalid"; false
-		elif [ "$i" == "0" ]; then
-			exit
-		else
-			echo "Reinstalling ${G}${name_unin[i]}${N}" | tr '_' ' '
-			sleep 0.4
-			rm -rf ${unin_app[i]}
-		fi
-	done
-	echo "Reboot to apply changes"
-	echo -n "Return to menu? < y | n >: "
-	read mchoice
-	app_name=()
-	[ "$mchoice" == "y" ] && menu || exit
+  echo "$div"
+  echo ""
+  list_unin_app
+  echo ""
+  echo " ${Bl}To reinstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
+  echo " x - ${Bl}Back to Menu${N}"
+  echo " 0 - ${Bl}Exit${N}"
+  echo ""
+  echo -n "[CHOICE]: "
+  read rein
+  [ "$rein" == "x" ] && menu
+  for i in $rein; do
+    if [ "$i" -gt ${#name_unin[@]} ] || [ "$i" -lt 0 ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
+      echo "Invalid"; false
+    elif [ "$i" == "0" ]; then
+      exit
+    else
+      echo "Reinstalling ${G}${name_unin[i]}${N}" | tr '_' ' '
+      sleep 0.4
+      rm -rf ${unin_app[i]}
+    fi
+  done
+  echo "Reboot to apply changes"
+  echo -n "Return to menu? < y | n >: "
+  read mchoice
+  app_name=()
+  [ "$mchoice" == "y" ] && menu || exit
 }
 
 menu() {
-	[ -n "$(find $MODDIR$SYSTEM2/app -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
-	[ -n "$(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
-	mod_head
-	echo ""
-	[ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
-	[ -d $SYSTEM/priv-app ] && echo " 2 - ${W}System Priv-Apps${N}"
-	[ -d $SYSTEM/vendor/app ] && echo " 3 - ${W}Vendor Apps${N}"
-	$show_rein && {
-		echo " 4 - ${W}Reinstall Uninstalled Apps${N}"
-		echo " e - ${W}Export Config${N}"
-	}
-	[ -f $import_file ] && echo " i - ${W}Import Config ($import_file)"
-	echo " d - ${C}Donate${N}"
-	echo " 0 - ${Bl}Exit${N}"
-	echo ""
-	echo -n "[CHOICE]: "
-	read choice
-	case "$choice" in
-		1)	if [ -d $SYSTEM/app ]; then
-				menu_list_system_app
-			else
-				abort Invalid
-			fi;;
-		2)	if [ -d $SYSTEM/priv-app ]; then
-				menu_list_system_priv-app
-			else
-				abort Invalid
-			fi;;
-		3)	if [ -d $SYSTEM/vendor/app ]; then
-				menu_list_vendor_app
-			else
-				abort Invalid
-			fi;;
-		4)	if $show_rein; then
-				menu_list_unin_app
-			else
-				abort Invalid
-			fi;;
-		e|E)if $show_rein; then
-				clear
-				echo "Exporting to ${W}$import_file...${N}"
-				sleep 0.4
-				clear
-				export_list
-				echo "Done"
-				echo -n "Return to menu? < y | n >: "
-				read mchoice
-				[ "$mchoice" == "y" ] && menu || exit
-			else
-				abort Invalid
-			fi;;
-		i|I)if [ -f $import_file ]; then
-				clear
-				echo "Importing from ${W}$import_file...${N}"
-				sleep 0.4
-				import_list
-				echo "Done"
-				echo -n "Return to menu? < y | n >: "
-				read mchoice
-				[ "$mchoice" == "y" ] && menu || exit
-			else
-				abort "Invalid"
-			fi;;
+  [ -n "$(find $MODDIR$SYSTEM2/app -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
+  [ -n "$(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
+  mod_head
+  echo ""
+  [ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
+  [ -d $SYSTEM/priv-app ] && echo " 2 - ${W}System Priv-Apps${N}"
+  [ -d $SYSTEM/vendor/app ] && echo " 3 - ${W}Vendor Apps${N}"
+  $show_rein && {
+    echo " 4 - ${W}Reinstall Uninstalled Apps${N}"
+    echo " e - ${W}Export Config${N}"
+  }
+  [ -f $import_file ] && echo " i - ${W}Import Config ($import_file)"
+  echo " d - ${C}Donate${N}"
+  echo " 0 - ${Bl}Exit${N}"
+  echo ""
+  echo -n "[CHOICE]: "
+  read choice
+  case "$choice" in
+    1)  if [ -d $SYSTEM/app ]; then
+        menu_list_system_app
+      else
+        abort Invalid
+      fi;;
+    2)  if [ -d $SYSTEM/priv-app ]; then
+        menu_list_system_priv-app
+      else
+        abort Invalid
+      fi;;
+    3)  if [ -d $SYSTEM/vendor/app ]; then
+        menu_list_vendor_app
+      else
+        abort Invalid
+      fi;;
+    4)  if $show_rein; then
+        menu_list_unin_app
+      else
+        abort Invalid
+      fi;;
+    e|E)if $show_rein; then
+        clear
+        echo "Exporting to ${W}$import_file...${N}"
+        sleep 0.4
+        clear
+        export_list
+        echo "Done"
+        echo -n "Return to menu? < y | n >: "
+        read mchoice
+        [ "$mchoice" == "y" ] && menu || exit
+      else
+        abort Invalid
+      fi;;
+    i|I)if [ -f $import_file ]; then
+        clear
+        echo "Importing from ${W}$import_file...${N}"
+        sleep 0.4
+        import_list
+        echo "Done"
+        echo -n "Return to menu? < y | n >: "
+        read mchoice
+        [ "$mchoice" == "y" ] && menu || exit
+      else
+        abort "Invalid"
+      fi;;
 
-		d|D)	am start https://paypal.me/veez21 >/dev/null;;
-		logs)	upload_logs;;
-		0)	exit;;
-		*)	abort Invalid;;
-	esac
+    d|D)  am start https://paypal.me/veez21 >/dev/null;;
+    logs)  upload_logs;;
+    0)  exit;;
+    *)  abort Invalid;;
+  esac
 }
 
 case "$1" in
-	-i) shift
-		[ -s "$1" ] && { import_list $1; exit; } || abort "Invalid file!";;
-	-e) shift
-		[ -f "$1" ] && abort "File exists!" || { export_list "$1"; exit; };;
-	-l) shift
-		[ ! "$1" ] && abort "$(help_me)"
-		if [ "$1" == "app" ]; then
-			list_s-app app 2>>$LOG
-		elif [ "$1" == "priv-app" ]; then
-			list_s-app priv-app 2>>$LOG
-		elif [ "$1" == "vendor" ]; then
-			list_s-app vendor/app 2>>$LOG
-		else
-			abort "$(help_me)"
-		fi
-		c=1
-		echo
-		for i in ${!app_name[@]}; do
-			[ ! "${app_label[i]}" ] && app_label[i]="null"
-			title_div "App $i"
-			echo "Name\t: $(echo ${app_name[i]} | tr '_' ' ')\nLabel\t: ${app_label[i]}\nDirectory\t: $(echo ${listapp[i]} | sed 's/.*\/system\///g')" | expand -t 10
-			c=$((c+1))
-		done; exit;;
-	-d) shift
-		[ ! "$1" ] && help_me
-		[ "$1" == "-h" ] && {
-			echo "$_name -d [system app label/s | system app folder/s]\ne.g. \"$_name -d com.google.android.youtube com.android.terminal Velvet LatinIME\"\n"
-			echo "To see the list of system apps and its info (its folder name or app label \nin this situation) use \"$_name -l\" "
-			exit
-		}
-		for i in "$@"; do
-			d_app_label=$(dumpsys package $i | grep "path:")
-			[ $? -gt 0 ] && DIR_APP=$(find $SYSTEM/app $SYSTEM/priv-app $SYSTEM/vendor/app -name $i -type d -mindepth 1) || DIR_APP=$(echo $d_app_label | sed 's/.*path: //;s/\(.*\)\/.*/\1/')
-			[ ! "$DIR_APP" ] && { echo "$i doesn't exist in $SYSTEM"; ok=false; continue; } || {
-				[ $(echo $DIR_APP | grep "/system") ] && {
-					ok=true
-				} || {
-					echo "$i is not a system app"
-					ok=false
-					continue
-				}
-			}
-			[ -f $MODDIR$DIR_APP/.replace ] && echo "$i already uninstalled" && continue
-			echo "$i found in $DIR_APP"
-			name[0]=${DIR_APP##*/}; apk_name[0]="$(basename $(find $DIR_APP -name "*.apk" -type f -mindepth 1))"; get_app_name $DIR_APP 0; PKG=${app_label[0]}
-			debloat_app n ${app_name[0]}
-		done
-		$ok || abort "error: Use \"$_name -d -h\" for help"
-		exit;;
-	-h|--help) help_me;;
+  -i) shift
+    [ -s "$1" ] && { import_list $1; exit; } || abort "Invalid file!";;
+  -e) shift
+    [ -f "$1" ] && abort "File exists!" || { export_list "$1"; exit; };;
+  -l) shift
+    [ ! "$1" ] && abort "$(help_me)"
+    if [ "$1" == "app" ]; then
+      list_s-app app 2>>$LOG
+    elif [ "$1" == "priv-app" ]; then
+      list_s-app priv-app 2>>$LOG
+    elif [ "$1" == "vendor" ]; then
+      list_s-app vendor/app 2>>$LOG
+    else
+      abort "$(help_me)"
+    fi
+    c=1
+    echo
+    for i in ${!app_name[@]}; do
+      [ ! "${app_label[i]}" ] && app_label[i]="null"
+      title_div "App $i"
+      echo "Name\t: $(echo ${app_name[i]} | tr '_' ' ')\nLabel\t: ${app_label[i]}\nDirectory\t: $(echo ${listapp[i]} | sed 's/.*\/system\///g')" | expand -t 10
+      c=$((c+1))
+    done; exit;;
+  -d) shift
+    [ ! "$1" ] && help_me
+    [ "$1" == "-h" ] && {
+      echo "$_name -d [system app label/s | system app folder/s]\ne.g. \"$_name -d com.google.android.youtube com.android.terminal Velvet LatinIME\"\n"
+      echo "To see the list of system apps and its info (its folder name or app label \nin this situation) use \"$_name -l\" "
+      exit
+    }
+    for i in "$@"; do
+      d_app_label=$(dumpsys package $i | grep "path:")
+      [ $? -gt 0 ] && DIR_APP=$(find $SYSTEM/app $SYSTEM/priv-app $SYSTEM/vendor/app -name $i -type d -mindepth 1) || DIR_APP=$(echo $d_app_label | sed 's/.*path: //;s/\(.*\)\/.*/\1/')
+      [ ! "$DIR_APP" ] && { echo "$i doesn't exist in $SYSTEM"; ok=false; continue; } || {
+        [ $(echo $DIR_APP | grep "/system") ] && {
+          ok=true
+        } || {
+          echo "$i is not a system app"
+          ok=false
+          continue
+        }
+      }
+      [ -f $MODDIR$DIR_APP/.replace ] && echo "$i already uninstalled" && continue
+      echo "$i found in $DIR_APP"
+      name[0]=${DIR_APP##*/}; apk_name[0]="$(basename $(find $DIR_APP -name "*.apk" -type f -mindepth 1))"; get_app_name $DIR_APP 0; PKG=${app_label[0]}
+      debloat_app n ${app_name[0]}
+    done
+    $ok || abort "error: Use \"$_name -d -h\" for help"
+    exit;;
+  -h|--help) help_me;;
 esac
 
 menu
