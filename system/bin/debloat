@@ -130,7 +130,7 @@ list_s-app() {
       fi
     fi
   done
-  app_name=(); xz=0
+  app_name=(); u_app_name=(); xz=0
   for i in $(cat $LISTFILE); do
     u_app_name[xz++]=$(echo $i | tr '^=' ' ' | awk '{print $1}')
   done
