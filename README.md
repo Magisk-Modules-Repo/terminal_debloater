@@ -20,6 +20,11 @@ or
 
 ## Changelog
 
+### v14
+* New app listing stuff is added! This has fixed several issues that users were having for a while now.
+* Added warning when an error was detected during app detection
+* App directory is now specified when listing uninstalled apps
+* Misc improvements
 ### v13.8.2
 * Display app folder in system instead of app label when listing apps
 * Misc improvements
