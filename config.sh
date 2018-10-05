@@ -89,13 +89,13 @@ set_permissions() {
   cp -af $INSTALLER/common/aapt $MODPATH/aapt
   cp -af $INSTALLER/common/exclude.list $MODPATH/exclude.list
   cp -af $INSTALLER/common/mod-util.sh $MODPATH/mod-util.sh
-  bin=bin
-  if (grep -q samsung /system/build.prop); then
-    bin=xbin
+  bin=xbin
+  if [ ! -d /system/xbin ]; then
+    bin=bin
 	mkdir $MODPATH/system/$bin
-	mv $MODPATH/system/bin/debloat $MODPATH/system/$bin
-	rm -rf $MODPATH/system/bin/*
-	rmdir $MODPATH/system/bin
+	mv $MODPATH/system/xbin/debloat $MODPATH/system/$bin
+	rm -rf $MODPATH/system/xbin/*
+	rmdir $MODPATH/system/xbin
   fi
   set_perm $MODPATH/system/$bin/debloat 0 0 0777
   set_perm $MODPATH/aapt 0 0 0755
