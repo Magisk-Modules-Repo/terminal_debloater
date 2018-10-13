@@ -74,16 +74,26 @@ MOUNT_LOOP=$(basename $(grep -m1 $MOUNTPATH /proc/mounts | awk '{print $1}'))
 debloat_app() {
   [ "$1" == "n" ] && shift || get_cfg $1
   if grep -w $DIR_APP /proc/mounts | grep -q $MOUNT_LOOP; then
-    echo "Failed! $DIR_APP is mounted (by another Magisk Module)!"
+    echo "${R}${1}${N} Failed! $DIR_APP is mounted (by another Magisk Module)!"
   else
     echo "Uninstalling ${R}${1}${N} ($DIR_APP)" | tr '%_' ' '
     sleep 0.4
-    mktouch $MODDIR$DIR_APP/.replace ${1}
-    $use_aapt && {
-      if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
-          echo " - App is updated, uninstall updates in Settings App"
-      fi
-    }
+	[ ! -d $DIR_APP ] && DIR_APP=$(dumpsys package $PKG | grep "path:" | sed 's/.*path: //;s/\(.*\)\/.*/\1/' 2>/dev/null)
+	echo " App Label: ${G}$PKG${N}"
+	echo " App Dir: ${G}$DIR_APP${N}"
+	echo -n " Proceed? <y|n> "
+	read proceed
+	case "$proceed" in
+	  y|Y)  mktouch ${MODDIR}${DIR_APP}/.replace ${1}
+            $use_aapt && {
+              if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
+                echo " - App is updated, uninstall updates in Settings App"
+              fi
+			}
+			echo "${R}${1}${N} uninstalled";;
+	  n|N) echo "${R}${1}${N} cancelled";;
+	  *) echo "Invalid!";;
+	esac
   fi
 }
 

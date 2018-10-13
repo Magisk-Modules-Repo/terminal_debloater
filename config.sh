@@ -124,14 +124,13 @@ detect_unin() {
   fi
   if [ -d "$COPYPATH/system/priv-app" ]; then
     cp -rf $COPYPATH/system/priv-app $TMPDIR/debloater
-	mitsuki=true
+    mitsuki=true
   fi
 }
 
 reuninstall() {
   if $mitsuki; then
-    cp -rf $TMPDIR/debloater/app $MODPATH/system 2>/dev/null >/dev/null
-    cp -rf $TMPDIR/debloater/priv-app $MODPATH/system 2>/dev/null >/dev/null
+    cp -rf $TMPDIR/debloater/app $MODPATH/system >/dev/null 2>&1
+    cp -rf $TMPDIR/debloater/priv-app $MODPATH/system >/dev/null 2>&1
   fi
 }
-
