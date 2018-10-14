@@ -20,6 +20,12 @@ or
 
 ## Changelog
 
+### v14.1
+* Improved debloating, it now asks you to proceed or not
+* Display app info when uninstalling
+  This allows you to make sure that the app you've chosen is correct
+* Installs by default in xbin
+* Misc improvements
 ### v14
 * New app listing stuff is added! This has fixed several issues that users were having for a while now.
 * Added warning when an error was detected during app detection
