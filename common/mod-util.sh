@@ -13,10 +13,12 @@ if [ -d /system_root ]; then
   isABDevice=true
   SYSTEM=/system_root/system
   SYSTEM2=/system
+  CACHELOC=/data/cache
 else
   isABDevice=false
   SYSTEM=/system
   SYSTEM2=/system
+  CACHELOC=/cache
 fi
 
 #=========================== Set Busybox (Used by Magisk) up
@@ -42,22 +44,21 @@ elif [ ! -x $SYSTEM/xbin/busybox ]; then
 else
   alias busybox=""
 fi
-if [ -x $SYSTEM/xbin/busybox ]; then
+if [ $_busybox ]; then
+  true
+elif [ -x $SYSTEM/xbin/busybox ]; then
   _bb=$SYSTEM/xbin/busybox
 elif [ -x $SYSTEM/bin/busybox ]; then
   _bb=$SYSTEM/bin/busybox
-elif [ $_busybox ]; then
-  true
 else
-  echo "! Busybox not detected.."
+  echo "! Busybox not detected"
   echo "Please install one (@osm0sis' busybox recommended)"
   false
 fi
 [ $? -ne 0 ] && exit $?
 alias echo='echo -e'
 [ -n "$LOGNAME" ] && alias clear='echo'
-_bbname=$(busybox | head -n1)
-_bbname=${_bbname%'('*}
+_bbname="$($_bb | head -n1 | awk '{print $1,$2}')"
 BBok=true
 if [ "$_bbname" == "" ]; then
   _bbname="BusyBox not found!"
