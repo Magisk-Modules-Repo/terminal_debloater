@@ -299,7 +299,7 @@ menu() {
     echo " 4 - ${W}Reinstall Uninstalled Apps${N}"
     echo " e - ${W}Export Config${N}"
   }
-  [ -f $import_file ] && echo " i - ${W}Import Config ($import_file)"
+  [ -f $import_file ] && echo " i - ${W}Import Config${N} ($import_file)"
   echo " d - ${C}Donate${N}"
   echo " 0 - ${Bl}Exit${N}"
   echo ""
