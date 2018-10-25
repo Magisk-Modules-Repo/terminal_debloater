@@ -81,7 +81,7 @@ debloat_app() {
 	[ ! -d $DIR_APP ] && DIR_APP=$(dumpsys package $PKG | grep "path:" | sed 's/.*path: //;s/\(.*\)\/.*/\1/' 2>/dev/null)
 	echo " App Label: ${G}$PKG${N}"
 	echo " App Dir: ${G}$DIR_APP${N}"
-	echo -n " Proceed? <y|n> "
+	echo -n " Proceed? < y | n >: "
 	read proceed
 	case "$proceed" in
 	  y|Y)  mktouch ${MODDIR}${DIR_APP}/.replace ${1}
