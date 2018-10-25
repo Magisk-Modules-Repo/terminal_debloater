@@ -377,12 +377,13 @@ case "$1" in
     fi
     c=1
     echo
-    for i in ${!app_name[@]}; do
+    for i in $(seq 1 $((${#app_name[@]}-1))); do
       [ ! "${app_label[i]}" ] && app_label[i]="null"
       title_div "App $i"
       echo "Name\t: $(echo ${app_name[i]} | tr '%_' ' ')\nLabel\t: ${app_label[i]}\nDirectory\t: $(echo ${listapp[i]} | sed 's/.*\/system\///g')" | expand -t 10
       c=$((c+1))
-    done; exit;;
+    done
+	exit;;
   -d) shift
     [ ! "$1" ] && help_me
     [ "$1" == "-h" ] && {
