@@ -300,7 +300,7 @@ menu() {
     echo " e - ${W}Export Config${N}"
   }
   [ -f $import_file ] && echo " i - ${W}Import Config${N} ($import_file)"
-  echo " d - ${C}Donate${N}"
+  [ "$((RANDOM%2+1))" -eq "2" ] && echo " d - ${C}Donate${N}"
   echo " 0 - ${Bl}Exit${N}"
   echo ""
   echo -n "[CHOICE]: "
