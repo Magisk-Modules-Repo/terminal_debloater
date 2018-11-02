@@ -5,8 +5,8 @@
 #
 ##########################################################################################
 
-MODUTILVER=v2
-MODUTILVCODE=2
+MODUTILVER=v2.1
+MODUTILVCODE=21
 
 #=========================== Determine if A/B OTA device
 if [ -d /system_root ]; then
@@ -21,7 +21,14 @@ else
   CACHELOC=/cache
 fi
 
-#=========================== Set Busybox (Used by Magisk) up
+#=========================== Set Busybox up
+# Variables:
+#  BBok - If busybox detection was ok (true/false)
+#  _bb - Busybox binary directory
+#  _bbname - Busybox name
+
+# set_busybox <busybox binary>
+# alias busybox applets
 set_busybox() {
   if [ -x "$1" ]; then
     for i in $(${1} --list); do
@@ -71,7 +78,7 @@ fi
 [ -f /data/adb/magisk/util_functions.sh ] && . /data/adb/magisk/util_functions.sh || exit 1
 
 # Device Info
-# BRAND MODEL DEVICE API ABI ABI2 ABILONG ARCH
+# Variables: BRAND MODEL DEVICE API ABI ABI2 ABILONG ARCH
 BRAND=$(getprop ro.product.brand)
 MODEL=$(getprop ro.product.model)
 DEVICE=$(getprop ro.product.device)
@@ -105,11 +112,14 @@ loadBar=' '			# Load UI
   G=''; R=''; Y=''; B=''; V=''; Bl=''; C=''; W=''; N=''; BGBL=''; loadBar='=';
 }
 
-# Divider (based on $MODTITLE, $VER, and $REL characters)
+# No. of characters in $MODTITLE, $VER, and $REL
 character_no=$(echo "$MODTITLE $VER $REL" | tr " " '_' | wc -c)
+
+# Divider
 div="${Bl}$(printf '%*s' "${character_no}" '' | tr " " "=")${N}"
 
-# Title Div
+# title_div <title>
+# based on $div with <title>
 title_div() {
   no=$(echo "$@" | wc -c)
   extdiv=$((no-character_no))
@@ -130,22 +140,30 @@ set_file_prop() {
 }
 
 # https://github.com/fearside/ProgressBar
+# ProgressBar <progress> <total>
 ProgressBar() {
+# Determine Screen Size
+  if [[ "$COLUMNS" -le "53" ]]; then
+    local var1=2
+	local var2=20
+  else
+    local var1=4
+    local var2=40
+  fi
 # Process data
-  _progress=$(((${1}*100/${2}*100)/100))
-  _done=$(((${_progress}*4)/10))
-  _left=$((40-$_done))
+  local _progress=$(((${1}*100/${2}*100)/100))
+  local _done=$(((${_progress}*${var1})/10))
+  local _left=$((${var2}-$_done))
 # Build progressbar string lengths
-  _done=$(printf "%${_done}s")
-  _left=$(printf "%${_left}s")
+  local _done=$(printf "%${_done}s")
+  local _left=$(printf "%${_left}s")
 
-# 1.2 Build progressbar strings and print the ProgressBar line
-# 1.2.1 Output example:
-# 1.2.1.1 Progress : [########################################] 100%
+# Build progressbar strings and print the ProgressBar line
 printf "\rProgress : ${BGBL}|${N}${_done// /${BGBL}$loadBar${N}}${_left// / }${BGBL}|${N} ${_progress}%%"
 }
 
 #https://github.com/fearside/SimpleProgressSpinner
+# Spinner <message>
 Spinner() {
 
 # Choose which character to show.
@@ -162,7 +180,7 @@ esac
 printf "\r${@} [${_indicator}]"
 }
 
-# "cmd & spinner [message]"
+# cmd & spinner <message>
 e_spinner() {
   PID=$!
   h=0; anim='-\|/';
@@ -174,12 +192,14 @@ e_spinner() {
 }
 
 # test_connection
+# tests if there's internet connection
 test_connection() {
   echo -n "Testing internet connection "
   ping -q -c 1 -W 1 google.com >/dev/null 2>/dev/null && echo "- OK" || { echo "Error"; false; }
 }
 
 # Log files will be uploaded to termbin.com
+# Logs included: VERLOG LOG oldVERLOG oldLOG
 upload_logs() {
   $BBok && {
     test_connection
