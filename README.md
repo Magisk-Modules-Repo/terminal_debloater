@@ -20,6 +20,12 @@ or
 
 ## Changelog
 
+### v15
+* Updated mod-util
+  * This contains a fix for the ProgressBar on small devices (with small dpi)
+* Add refresh option when listing apps (App list now persist, unless you fully exit)
+* Fixed app listing option in command line
+* Misc improvements
 ### v14.1
 * Improved debloating, it now asks you to proceed or not
 * Display app info when uninstalling
@@ -31,61 +37,3 @@ or
 * Added warning when an error was detected during app detection
 * App directory is now specified when listing uninstalled apps
 * Misc improvements
-### v13.8.2
-* Display app folder in system instead of app label when listing apps
-* Misc improvements
-### v13.8
-* Display app label when listing apps
-* Misc improvements
-### v13.7.3
-* Fix freezing when listing apps (fiatCurrency)
-### v13.7.1
-* Fix app mounted detection
-### v13.7
-* Detect if a system app is from another Magisk Module (or any other ways of mounting)
-  This prevents conflicts between magisk modules like Terminal App Systemizer
-* Improve apk name detection
-* Misc improvements
-### v13.6.1
-* Fix derp in listing apps
-* Misc improvements
-### v13.6
-* Fix listing apps
-* Use pm uninstall to uninstall app updates (only when in ADB Shell or when selinux is permissive)
-* Fix exclude list installation
-* Misc improvements
-### v13.5
-* Sort listed apps alphabetically
-* Misc improvements
-### v13.4
-* Improve exclude detection
-* Updated exclude list
-* Misc improvements
-### v13.3
-* Exclude critical system apps from listing
-* Misc improvements
-### v13.2
-* Fix listing system apps that are debloated
-### v13.1
-* Fix detection of apk in /data
-* System app listing looks better and much more readable :3
-* Misc improvements
-### v13
-* debloat -d now supports app label (e.g. com.android.terminal)
-* Misc improvements
-### v12
-* Add options w/o menu (try: debloat -h)
-* Fixes and optimizations (ala google XD)
-### v11.3
-* Fix listing when going back and forth in the menu
-* Misc
-### v11.2
-* Add vendor apps
-* Add option on deleting the apk in /data
-* other changes
-### v11.1
-* Fixed stuff related to busybox alias
-### v11
-* Add Back to menu option
-* Logs can now be uploaded by entering `logs`
-* Misc improvements XD
