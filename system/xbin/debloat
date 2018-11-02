@@ -66,6 +66,7 @@ export PATH=$MODDIR:$PATH
 import_file=/cache/import-debloat.txt
 exclude_file=$MODDIR/exclude.list
 LISTFILE=/cache/debloat.list
+RESCAN=true
 MOUNT_LOOP=$(basename $(grep -m1 $MOUNTPATH /proc/mounts | awk '{print $1}'))
 
 [ $(getenforce) == "Permissive" ] && use_cmd=true || use_cmd=false
@@ -123,28 +124,31 @@ get_app_name() {
 }
 
 list_s-app() {
-  rm $LISTFILE 2>>$LOG; app_name=(); listapp=()
-  x=1
-  type=$1
-  sapp=($(ls $SYSTEM/$type))
-  for i in ${sapp[@]}; do
-    ProgressBar $x ${#sapp[@]}
-    listapp[x]=$SYSTEM2/$type/$i
-    if [[ ! -d $MODDIR${listapp[x]} ]]; then
-      if ! grep -xqE -e "(app|priv-app|vendor/app)/${i}" $exclude_file; then
-        name[x]=${i}
-        apk_name[x]="$(basename $(find $SYSTEM/$type/$i -name "*.apk" -type f -mindepth 1))"
-        get_app_name ${listapp[x]} $x
-        echo "^=${app_name[x]}^=${listapp[x]}^=${app_label[x]}" >> $LISTFILE
-        x=$((x+1))
+  if [ "$RESCAN" ] && [ "$type" != "$1" ]; then
+    rm $LISTFILE 2>>$LOG; app_name=(); listapp=()
+    x=1
+    type=$1
+    sapp=($(ls $SYSTEM/$type))
+    for i in ${sapp[@]}; do
+      ProgressBar $x ${#sapp[@]}
+      listapp[x]=$SYSTEM2/$type/$i
+      if [[ ! -d $MODDIR${listapp[x]} ]]; then
+        if ! grep -xqE -e "(app|priv-app|vendor/app)/${i}" $exclude_file; then
+          name[x]=${i}
+          apk_name[x]="$(basename $(find $SYSTEM/$type/$i -name "*.apk" -type f -mindepth 1))"
+          get_app_name ${listapp[x]} $x
+          echo "^=${app_name[x]}^=${listapp[x]}^=${app_label[x]}" >> $LISTFILE
+          x=$((x+1))
+        fi
       fi
-    fi
-  done
-  app_name=(); u_app_name=(); xz=0
-  for i in $(cat $LISTFILE); do
-    u_app_name[xz++]=$(echo $i | tr '^=' ' ' | awk '{print $1}')
-  done
-  app_name=($(printf '%s\n' "${u_app_name[@]}" | sort -f))
+    done
+    app_name=(); u_app_name=(); xz=0
+    for i in $(cat $LISTFILE); do
+      u_app_name[xz++]=$(echo $i | tr '^=' ' ' | awk '{print $1}')
+    done
+    app_name=($(printf '%s\n' "${u_app_name[@]}" | sort -f))
+	RESCAN=false
+  fi
 }
 
 list_unin_app() {
@@ -230,11 +234,13 @@ menu_list_system_app() {
   $dir_error && echo " ${R}An error was detected while detecting system apps. BEWARE!${N}"
   echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
   echo " x - ${Bl}Back to Menu${N}"
+  echo " r - ${Bl}Refresh list${N}"
   echo " 0 - ${Bl}Exit${N}"
   echo "$div"
   echo -n "[CHOICE]: "
   read app
   [ "$app" == "x" ] && menu
+  [ "$app" == "r" ] && RESCAN=true && menu_list_system_app
   for i in $app; do
     if [ "$i" -gt "${#listapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
       echo "$i - Invalid"; false
