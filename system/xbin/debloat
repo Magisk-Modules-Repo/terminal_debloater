@@ -278,9 +278,10 @@ menu_list_custom_dir() {
   echo " system apps/bloatware"
   echo "$div"
   echo "\n Example: /system/delapp"
-  echo ""
+  echo " x - ${Bl}Back to Menu${N}"
   echo -n " > "
   read custdir
+  [ "$custdir" == "x" ] && menu
   echo -n " Checking if $custdir exists"
   if [ -d "$custdir" ]; then
     echo " - OK"
