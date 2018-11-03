@@ -328,9 +328,7 @@ menu_list_custom_dir() {
 }
 
 menu() {
-  [ -n "$(find $MODDIR$SYSTEM2/app -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
-  [ -n "$(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
-  [ -n "$(find $MODDIR$SYSTEM2/vendor/app -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
+  [ -n "$(find $MODDIR$SYSTEM2 -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
   mod_head
   echo ""
   [ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
