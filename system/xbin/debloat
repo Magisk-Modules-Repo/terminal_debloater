@@ -153,39 +153,15 @@ list_s-app() {
 
 list_unin_app() {
   c=1
-  if [ -d $SYSTEM/app ] && [ -d $MODDIR$SYSTEM2/app ]; then
-    for i in $(ls $MODDIR$SYSTEM2/app); do
-      unin_app[c]=$MODDIR$SYSTEM2/app/$i
-      name_unin[c]=$(cat $MODDIR$SYSTEM2/app/$i/.replace)
-      if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/app/$i/.replace) ]]; then
-        name_unin[c]=$i
-      fi
-      echo " $c - ${W}${name_unin[c]}${N} (app)" | tr '_' ' ' | tr '%_' ' '
-      c=$((c+1))
-    done
-  fi
-  if [ -d $SYSTEM/priv-app ] && [ -d $MODDIR$SYSTEM2/priv-app ]; then
-    for i in $(ls $MODDIR$SYSTEM2/priv-app); do
-      unin_app[c]=$MODDIR$SYSTEM2/priv-app/$i
-      name_unin[c]=$(cat $MODDIR$SYSTEM2/priv-app/$i/.replace)
-      if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/priv-app/$i/.replace) ]]; then
-        name_unin[c]=$i
-      fi
-      echo " $c - ${W}${name_unin[c]}${N} (priv-app)" | tr '_' ' ' | tr '%_' ' '
-      c=$((c+1))
-    done
-  fi
-  if [ -d $SYSTEM/vendor/app ] && [ -d $MODDIR$SYSTEM2/vendor/app ]; then
-    for i in $(ls $MODDIR$SYSTEM2/vendor/app); do
-      unin_app[c]=$MODDIR$SYSTEM2/vendor/app/$i
-      name_unin[c]=$(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace)
-      if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $MODDIR$SYSTEM2/vendor/app/$i/.replace) ]]; then
-        name_unin[c]=$i
-      fi
-      echo " $c - ${W}${name_unin[c]}${N} (vendor/app)" | tr '_' ' ' | tr '%_' ' '
-      c=$((c+1))
-    done
-  fi
+  for i in $(find $MODDIR$SYSTEM2 -name ".replace" -type f); do
+    unin_app[c]=$(dirname $i)
+    name_unin[c]=$(cat $i)
+    if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $i) ]]; then
+      name_unin[c]=$(basename ${unin_app[c]})
+    fi
+    echo " $c - ${W}${name_unin[c]}${N} ($(basename ${unin_app[c]%/*}))" | tr '_' ' ' | tr '%_' ' '
+    c=$((c+1))
+  done
 }
 
 import_list() {
