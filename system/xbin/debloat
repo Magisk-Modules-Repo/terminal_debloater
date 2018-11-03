@@ -385,9 +385,10 @@ case "$1" in
     c=1
     echo
     for i in $(seq 1 $((${#app_name[@]}-1))); do
-      [ ! "${app_label[i]}" ] && app_label[i]="null"
+      get_cfg ${app_name[i]}
+      [ ! "$PKG" ] && PKG="null"
       title_div "App $i"
-      echo "Name\t: $(echo ${app_name[i]} | tr '%_' ' ')\nLabel\t: ${app_label[i]}\nDirectory\t: $(echo ${listapp[i]} | sed 's/.*\/system\///g')" | expand -t 10
+      echo "Name\t: $(echo $APP_NAME | tr '%_' ' ')\nLabel\t: $PKG\nDirectory\t: $(echo $DIR_APP | sed 's/.*\/system\///g')" | expand -t 10
       c=$((c+1))
     done
 	exit;;
