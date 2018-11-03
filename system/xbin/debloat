@@ -293,6 +293,40 @@ menu_list_unin_app() {
   [ "$mchoice" == "y" ] && menu || exit
 }
 
+menu_list_custom_dir() {
+  clear
+  echo "$div"
+  title_div "Custom Debloat Directory"
+  echo "$div"
+  echo " Enter a directory in $SYSTEM that contains"
+  echo " system apps/bloatware"
+  echo "$div"
+  echo "\n Example: /system/delapp"
+  echo ""
+  echo -n " > "
+  read custdir
+  echo -n " Checking if $custdir exists"
+  if [ -d "$custdir" ]; then
+    echo " - OK"
+	echo -n " Checking if $custdir is in $SYSTEM"
+	if [ "/$(echo $custdir | awk -F "/" '{print $2}')" == "$SYSTEM" ]; then
+	  echo " - OK"
+      sleep 1.5
+      menu_list_system_app "$(echo $custdir | sed 's/.*\/system\///g')"
+	else
+	  echo " - Error!"
+      echo -n "Return to menu? < y | n >: "
+      read mchoice
+      [ "$mchoice" == "y" ] && menu || exit
+	fi
+  else
+    echo " - Error!"
+    echo -n "Return to menu? < y | n >: "
+    read mchoice
+    [ "$mchoice" == "y" ] && menu || exit
+  fi
+}
+
 menu() {
   [ -n "$(find $MODDIR$SYSTEM2/app -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
   [ -n "$(find $MODDIR$SYSTEM2/priv-app -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
@@ -304,6 +338,7 @@ menu() {
   [ -d $SYSTEM/vendor/app ] && echo " 3 - ${W}Vendor Apps${N}"
   $show_rein && {
     echo " 4 - ${W}Reinstall Uninstalled Apps${N}"
+	echo " 5 - Enter Custom System Apps dir"
     echo " e - ${W}Export Config${N}"
   }
   [ -f $import_file ] && echo " i - ${W}Import Config${N} ($import_file)"
@@ -333,6 +368,7 @@ menu() {
       else
         abort Invalid
       fi;;
+    5)  menu_list_custom_dir;;
     e|E)if $show_rein; then
         clear
         echo "Exporting to ${W}$import_file...${N}"
