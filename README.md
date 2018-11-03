@@ -20,6 +20,12 @@ or
 
 ## Changelog
 
+### v15.1
+* Updated mod-util
+  * Sets Magisk's busybox path on a higher level in $PATH
+* (Experimental) Add Custom Debloat Dir to be used on peculiar devices :P
+* Fixed app listing option in command line (again)
+* Misc improvements
 ### v15
 * Updated mod-util
   * This contains a fix for the ProgressBar on small devices (with small dpi)

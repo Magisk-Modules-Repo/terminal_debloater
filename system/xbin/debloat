@@ -274,6 +274,7 @@ menu_list_custom_dir() {
   echo "$div"
   title_div "Custom Debloat Directory"
   echo "$div"
+  echo " ${R}EXPERIMENTAL!${N}"
   echo " Enter a directory in $SYSTEM that contains"
   echo " system apps/bloatware"
   echo "$div"
