@@ -312,9 +312,9 @@ menu() {
   [ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
   [ -d $SYSTEM/priv-app ] && echo " 2 - ${W}System Priv-Apps${N}"
   [ -d $SYSTEM/vendor/app ] && echo " 3 - ${W}Vendor Apps${N}"
+  echo " 4 - Enter Custom System Apps dir"
   $show_rein && {
-    echo " 4 - ${W}Reinstall Uninstalled Apps${N}"
-	echo " 5 - Enter Custom System Apps dir"
+    echo " 5 - ${W}Reinstall Uninstalled Apps${N}"
     echo " e - ${W}Export Config${N}"
   }
   [ -f $import_file ] && echo " i - ${W}Import Config${N} ($import_file)"
