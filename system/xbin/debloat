@@ -339,12 +339,12 @@ menu() {
       else
         abort Invalid
       fi;;
-    4)  if $show_rein; then
+    4)  menu_list_custom_dir;;
+    5)  if $show_rein; then
         menu_list_unin_app
       else
         abort Invalid
       fi;;
-    5)  menu_list_custom_dir;;
     e|E)if $show_rein; then
         clear
         echo "Exporting to ${W}$import_file...${N}"
