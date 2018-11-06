@@ -257,7 +257,7 @@ menu_list_unin_app() {
     elif [ "$i" == "0" ]; then
       exit
     else
-      echo "Reinstalling ${G}${name_unin[i]}${N}" | tr '%_' ' '
+      echo "Reinstalling ${G}${name_unin[i]}${N}" | tr '_' ' ' | tr '%_' ' '
       sleep 0.4
       rm -rf ${unin_app[i]}
     fi
@@ -275,8 +275,8 @@ menu_list_custom_dir() {
   title_div "Custom Debloat Directory"
   echo "$div"
   echo " ${R}EXPERIMENTAL!${N}"
-  echo " Enter a directory in $SYSTEM that contains"
-  echo " system apps/bloatware"
+  echo " Enter a directory in $SYSTEM"
+  echo " that contains system apps/bloatware"
   echo "$div"
   echo "\n Example: /system/delapp"
   echo " x - ${Bl}Back to Menu${N}"
@@ -312,7 +312,7 @@ menu() {
   [ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
   [ -d $SYSTEM/priv-app ] && echo " 2 - ${W}System Priv-Apps${N}"
   [ -d $SYSTEM/vendor/app ] && echo " 3 - ${W}Vendor Apps${N}"
-  echo " 4 - Enter Custom System Apps dir"
+  echo " 4 - ${W}Enter Custom System Apps dir${N}"
   $show_rein && {
     echo " 5 - ${W}Reinstall Uninstalled Apps${N}"
     echo " e - ${W}Export Config${N}"
