@@ -20,6 +20,14 @@ or
 
 ## Changelog
 
+### v15.2
+* Updated mod-util
+  * Adds prandom and CACHELOC variable
+* Fix bug when using `debloat -d` on system app folders
+* Fix refresh option in apps list
+* Add Import and Export UI
+* Improve importing and exporting
+* Misc improvements
 ### v15.1
 * Updated mod-util
   * Sets Magisk's busybox path on a higher level in $PATH
