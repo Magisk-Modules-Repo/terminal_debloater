@@ -165,7 +165,7 @@ list_unin_app() {
 }
 
 import_list() {
-  [[ "$1" ]] && import_file=$1
+  [[ "$1" ]] && local import_file=$1
   if [[ -f $import_file ]] && [[ "$(grep_prop debloat.import $import_file)" == 1 ]]; then
     c=1
 	for i in $(cat $import_file | grep -v debloat.import); do
@@ -182,7 +182,7 @@ import_list() {
 }
 
 export_list() {
-  [[ "$1" ]] && import_file=$1
+  [[ "$1" ]] && local import_file=$1
   mktouch $import_file "debloat.import=1"
   for i in $(find $MODDIR/system -name ".replace" -type f); do
     local dir=${i%/*}
@@ -307,6 +307,91 @@ menu_list_custom_dir() {
   fi
 }
 
+menu_export_list() {
+  clear
+  echo "$div"
+  title_div "Export Config"
+  echo "$div"
+  echo " Saves the current debloated apps"
+  echo " to a file so it can be imported later/shared"
+  echo "$div"
+  echo ""
+  echo " Enter a directory to save the file"
+  echo " or leave it blank to use default ($import_file)"
+  echo " Example: /sdcard"
+  echo " x - ${Bl}Back to Menu${N}"
+  echo -n " > "
+  read export_dir
+  [ "$export_dir" == "x" ] && menu
+  if [[ ! "$export_dir" ]]; then
+    echo "Exporting to ${W}$import_file...${N}"
+    sleep 0.4
+    export_list
+    echo "Done"
+    echo -n "Return to menu? < y | n >: "
+    read mchoice
+    [ "$mchoice" == "y" ] && menu || exit
+  fi
+  echo -n " Checking if $export_dir exists"
+  if [[ -d "$export_dir" ]]; then
+    echo " - OK"
+    echo " Exporting to ${W}$export_dir/import-debloat.txt...${N}"
+    sleep 0.4
+    export_list $export_dir/import-debloat.txt
+    echo "Done"
+    echo -n "Return to menu? < y | n >: "
+    read mchoice
+    [ "$mchoice" == "y" ] && menu || exit
+  else
+    echo " - Error!"
+    echo -n "Return to menu? < y | n >: "
+    read mchoice
+    [ "$mchoice" == "y" ] && menu || exit
+  fi
+}
+
+menu_import_list() {
+  clear
+  echo "$div"
+  title_div "Import Config"
+  echo "$div"
+  echo " Import from a txt file exported from this module"
+  echo " ${R}Be careful importing untrusted sources!${N}"
+  echo "$div"
+  echo ""
+  [ -f $import_file ] && echo " ${G}$import_file detected! Leave blank and enter to use it.${N}"
+  echo " Enter the directory of the import file"
+  echo " Example: /sdcard/import-debloat.txt"
+  echo -n " > "
+  read import_dir
+  [ "$import_dir" == "x" ] && menu
+  if [[ -f $import_file ]] && [[ ! "$import_dir" ]]; then
+    echo " Importing from ${W}$import_file...${N}"
+    sleep 0.4
+    import_list
+    echo "Done"
+    echo -n "Return to menu? < y | n >: "
+    read mchoice
+    [ "$mchoice" == "y" ] && menu || exit
+  fi
+  echo -n " Checking if $import_dir exists"
+  if [[ -f "$import_dir" ]]; then
+    echo " - OK"
+    echo " Importing from ${W}$import_dir...${N}"
+    sleep 0.4
+    import_list $import_dir
+    echo "Done"
+    echo -n "Return to menu? < y | n >: "
+    read mchoice
+    [ "$mchoice" == "y" ] && menu || exit
+  else
+    echo " - Error!"
+    echo -n "Return to menu? < y | n >: "
+    read mchoice
+    [ "$mchoice" == "y" ] && menu || exit
+  fi
+}
+
 menu() {
   [ -n "$(find $MODDIR$SYSTEM2 -name ".replace" -type f 2>>$LOG)" ] &&  show_rein=true
   mod_head
@@ -319,7 +404,7 @@ menu() {
     echo " 5 - ${W}Reinstall Uninstalled Apps${N}"
     echo " e - ${W}Export Config${N}"
   }
-  [ -f $import_file ] && echo " i - ${W}Import Config${N} ($import_file)"
+  echo " i - ${W}Import Config${N} ($import_file)"
   [ "$((RANDOM%2+1))" -eq "2" ] && echo " d - ${C}Donate${N}"
   echo " 0 - ${Bl}Exit${N}"
   echo ""
@@ -348,30 +433,11 @@ menu() {
         abort Invalid
       fi;;
     e|E)if $show_rein; then
-        clear
-        echo "Exporting to ${W}$import_file...${N}"
-        sleep 0.4
-        clear
-        export_list
-        echo "Done"
-        echo -n "Return to menu? < y | n >: "
-        read mchoice
-        [ "$mchoice" == "y" ] && menu || exit
+	    menu_export_list
       else
         abort Invalid
       fi;;
-    i|I)if [ -f $import_file ]; then
-        clear
-        echo "Importing from ${W}$import_file...${N}"
-        sleep 0.4
-        import_list
-        echo "Done"
-        echo -n "Return to menu? < y | n >: "
-        read mchoice
-        [ "$mchoice" == "y" ] && menu || exit
-      else
-        abort "Invalid"
-      fi;;
+    i|I) menu_import_list;;
 
     d|D)  am start https://paypal.me/veez21 >/dev/null;;
     logs)  upload_logs;;
