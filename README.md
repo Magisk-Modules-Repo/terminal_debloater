@@ -20,6 +20,8 @@ or
 
 ## Changelog
 
+### v15.2.1
+* Fix logs dirs not set
 ### v15.2
 * Updated mod-util
   * Adds prandom and CACHELOC variable
