@@ -480,8 +480,7 @@ case "$1" in
       exit
     }
     for i in "$@"; do
-      d_app_label=$(dumpsys package $i | grep "path:")
-      [ $? -gt 0 ] && DIR_APP=$(find $SYSTEM/app $SYSTEM/priv-app $SYSTEM/vendor/app -name $i -type d -mindepth 1) || DIR_APP=$(echo $d_app_label | sed 's/.*path: //;s/\(.*\)\/.*/\1/')
+      [ -d /data/data/$i ] && DIR_APP=$(dumpsys package $i | grep "path:" | sed 's/.*path: //;s/\(.*\)\/.*/\1/') || DIR_APP=$(find $SYSTEM/app $SYSTEM/priv-app $SYSTEM/vendor/app -name $i -type d -mindepth 1)
       [ ! "$DIR_APP" ] && { echo "$i doesn't exist in $SYSTEM"; ok=false; continue; } || {
         [ $(echo $DIR_APP | grep "/system") ] && {
           ok=true
@@ -495,6 +494,7 @@ case "$1" in
       echo "$i found in $DIR_APP"
       name[0]=${DIR_APP##*/}; apk_name[0]="$(basename $(find $DIR_APP -name "*.apk" -type f -mindepth 1))"; get_app_name $DIR_APP 0; PKG=${app_label[0]}
       debloat_app n ${app_name[0]}
+	  unset DIR_APP
     done
     $ok || abort "error: Use \"$_name -d -h\" for help"
     exit;;
