@@ -189,7 +189,7 @@ export_list() {
 	local folder=${dir##*/}
 	local name=$(cat $i) || local name=$folder
     echo "$folder^=${dir#*${MODDIR}}" >> $import_file
-    echo " $name - Exported"
+    echo " $name - Exported" | tr '_' ' ' | tr '%_' ' '
   done
 }
 
