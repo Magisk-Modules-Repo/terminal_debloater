@@ -8,19 +8,6 @@
 MODUTILVER=v2.2
 MODUTILVCODE=22
 
-#=========================== Determine if A/B OTA device
-if [ -d /system_root ]; then
-  isABDevice=true
-  SYSTEM=/system_root/system
-  SYSTEM2=/system
-  CACHELOC=/data/cache
-else
-  isABDevice=false
-  SYSTEM=/system
-  SYSTEM2=/system
-  CACHELOC=/cache
-fi
-
 #=========================== Set Busybox up
 # Variables:
 #  BBok - If busybox detection was ok (true/false)

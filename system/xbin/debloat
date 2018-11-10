@@ -10,6 +10,19 @@ ID="terminal_debloater"
 _name=$(basename $0)
 ls /data >/dev/null 2>&1 || { echo "$ID needs to run as root!"; echo "type 'su' then '$_name'"; exit 1; }
 
+# Determine if A/B OTA device
+if [ -d /system_root ]; then
+  isABDevice=true
+  SYSTEM=/system_root/system
+  SYSTEM2=/system
+  CACHELOC=/data/cache
+else
+  isABDevice=false
+  SYSTEM=/system
+  SYSTEM2=/system
+  CACHELOC=/cache
+fi
+
 # Magisk Mod Directory
 MOUNTPATH=/sbin/.core/img
 MODDIR="$MOUNTPATH/$ID"
@@ -25,8 +38,8 @@ mount -o rw,remount /cache 2>/dev/null
 LOG=$CACHELOC/${ID}.log
 oldLOG=$CACHELOC/${ID}-old.log
 # > Verbose output goes here
-VERLOG=/cache/${ID}-verbose.log
-oldVERLOG=/cache/${ID}-verbose-old.log
+VERLOG=$CACHELOC/${ID}-verbose.log
+oldVERLOG=$CACHELOC/${ID}-verbose-old.log
 
 # Start Logging verbosely
 mv -f $VERLOG $oldVERLOG 2>/dev/null; mv -f $LOG $oldLOG 2>/dev/null
