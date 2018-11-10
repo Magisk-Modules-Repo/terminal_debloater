@@ -22,8 +22,8 @@ fi
 mount -o remount,rw /cache 2>/dev/null
 mount -o rw,remount /cache 2>/dev/null
 # > Logs should go in this file
-LOG=/cache/${ID}.log
-oldLOG=/cache/${ID}-old.log
+LOG=$CACHELOC/${ID}.log
+oldLOG=$CACHELOC/${ID}-old.log
 # > Verbose output goes here
 VERLOG=/cache/${ID}-verbose.log
 oldVERLOG=/cache/${ID}-verbose-old.log
