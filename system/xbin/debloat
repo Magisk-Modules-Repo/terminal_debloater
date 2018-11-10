@@ -124,7 +124,7 @@ get_app_name() {
 }
 
 list_s-app() {
-  if [ "$RESCAN" ] && [ "$type" != "$1" ]; then
+  if [[ "$RESCAN" ]] && [[ "$type" != "$1" ]]; then
     rm $LISTFILE 2>>$LOG; app_name=(); listapp=()
     x=1
     type=$1
@@ -218,7 +218,7 @@ menu_list_system_app() {
   echo -n "[CHOICE]: "
   read app
   [ "$app" == "x" ] && menu
-  [ "$app" == "r" ] && RESCAN=true && menu_list_system_app
+  [ "$app" == "r" ] && { RESCAN=true; type=null ; menu_list_system_app $1; }
   for i in $app; do
     if [ "$i" -gt "${#listapp[@]}" ] || [ "$i" -lt "0" ] || [ "$i" == "" ] || [ -n "$(echo $i | tr -d '0-9')" ] ; then
       echo "$i - Invalid"; false
