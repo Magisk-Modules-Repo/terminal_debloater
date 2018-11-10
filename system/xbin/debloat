@@ -165,15 +165,14 @@ list_unin_app() {
 }
 
 import_list() {
-  [ "$1" ] && import_file=$1
-  if [ -f $import_file ] && (grep -q "$MODDIR" $import_file); then
+  [[ "$1" ]] && import_file=$1
+  if [[ -f $import_file ]] && [[ "$(grep_prop debloat.import $import_file)" == 1 ]]; then
     c=1
-    import_apps=($(cat $import_file))
-    for i in ${import_apps[@]}; do
-      name[c]=${i##*/}
-      sys_dir=${i#*${MODDIR}}
+	for i in $(cat $import_file | grep -v debloat.import); do
+	  name[c]=${i%^=*}
+	  sys_dir=${i#*^=}
       get_app_name $sys_dir $c
-      mktouch $i/.replace ${app_name[c]}
+      mktouch $MODDIR$sys_dir/.replace ${app_name[c]}
       echo "${W}${app_name[c]}${N} - Imported"
       c=$((c+1))
     done
@@ -183,11 +182,14 @@ import_list() {
 }
 
 export_list() {
-  [ "$1" ] && import_file=$1
-  mktouch $import_file
+  [[ "$1" ]] && import_file=$1
+  mktouch $import_file "debloat.import=1"
   for i in $(find $MODDIR/system -name ".replace" -type f); do
-    echo ${i%/*} >> $import_file
-    echo "$(cat $i) - Exported"
+    local dir=${i%/*}
+	local folder=${dir##*/}
+	local name=$(cat $i) || local name=$folder
+    echo "$folder^=${dir#*${MODDIR}}" >> $import_file
+    echo " $name - Exported"
   done
 }
 
