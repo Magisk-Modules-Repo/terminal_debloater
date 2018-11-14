@@ -8,6 +8,24 @@
 MODUTILVER=v2.2
 MODUTILVCODE=22
 
+# Check A/B slot
+SLOT=`grep_cmdline androidboot.slot_suffix`
+if [ -z $SLOT ]; then
+  SLOT=_`grep_cmdline androidboot.slot`
+  [ $SLOT = "_" ] && {
+    SLOT=
+    isABDevice=true
+    SYSTEM=/system_root/system
+    SYSTEM2=/system
+    CACHELOC=/data/cache
+  } || {
+    isABDevice=false
+    SYSTEM=/system
+    SYSTEM2=/system
+    CACHELOC=/cache
+  }
+fi
+
 #=========================== Set Busybox up
 # Variables:
 #  BBok - If busybox detection was ok (true/false)
@@ -61,9 +79,6 @@ fi
 
 #=========================== Default Functions and Variables
 
-# Import util_functions.sh
-[ -f /data/adb/magisk/util_functions.sh ] && . /data/adb/magisk/util_functions.sh || exit 1
-
 # Device Info
 # Variables: BRAND MODEL DEVICE API ABI ABI2 ABILONG ARCH
 BRAND=$(getprop ro.product.brand)
@@ -105,12 +120,13 @@ character_no=$(echo "$MODTITLE $VER $REL" | wc -c)
 # Divider
 div="${Bl}$(printf '%*s' "${character_no}" '' | tr " " "=")${N}"
 
-# title_div <title>
+# title_div [-c] <title>
 # based on $div with <title>
 title_div() {
-  no=$(echo "$@" | wc -c)
-  extdiv=$((no-character_no))
-  echo "${W}$@${N} ${Bl}$(printf '%*s' "$extdiv" '' | tr " " "=")${N}"
+  [ "$1" == "-c" ] && local character_no=$2 && shift 2
+  [ -z "$1" ] && { local message=; no=0; } || { local message="$@ "; local no=$(echo "$@" | wc -c); }
+  [ $character_no -gt $no ] && local extdiv=$((character_no-no)) || { echo "Invalid!"; return; }
+  echo "${W}$message${N}${Bl}$(printf '%*s' "$extdiv" '' | tr " " "=")${N}"
 }
 
 # set_file_prop <property> <value> <prop.file>
