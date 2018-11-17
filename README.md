@@ -20,6 +20,11 @@ or
 
 ## Changelog
 
+### v16
+* Update mod-util
+  * Changes related to Magisk's path changes (will be removed when it's added in stable)
+  * Better A/B detection
+* Misc improvements
 ### v15.2.1
 * Fix logs dirs not set
 ### v15.2
