@@ -413,7 +413,7 @@ menu() {
   echo " i - ${W}Import Config${N} ($import_file)"
   prandom " d - ${C}Donate${N}"
   echo " 0 - ${Bl}Exit${N}"
-  prandom " ${R}SUBSCRIBE TO PEWDIEPIE!!!!!!!!!${N}"
+  prandom -c 15 3 " ${R}SUBSCRIBE TO PEWDIEPIE!!!!!!!!!${N}"
   echo ""
   echo -n "[CHOICE]: "
   read choice
