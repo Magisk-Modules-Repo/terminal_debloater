@@ -93,8 +93,8 @@ debloat_app() {
                 echo " - App is updated, uninstall updates in Settings App"
               fi
 			}
-			echo "${R}${1}${N} uninstalled";;
-	  n|N) echo "${R}${1}${N} cancelled";;
+			echo "${R}${1}${N} uninstalled" | tr '%_' ' ';;
+	  n|N) echo "${R}${1}${N} cancelled" | tr '%_' ' ';;
 	  *) echo "Invalid!";;
 	esac
   fi
