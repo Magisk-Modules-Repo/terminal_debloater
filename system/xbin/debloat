@@ -353,7 +353,7 @@ menu_import_list() {
   title_div "Import Config"
   echo "$div"
   echo " Import from a txt file exported from this module"
-  echo " ${R}Be careful importing untrusted sources!${N}"
+  echo " ${R}Be careful importing from unknown sources!${N}"
   echo "$div"
   echo ""
   [ -f $import_file ] && echo " ${G}$import_file detected! Leave blank and enter to use it.${N}"
