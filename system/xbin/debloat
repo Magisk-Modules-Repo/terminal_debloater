@@ -166,7 +166,7 @@ import_list() {
   [[ "$1" ]] && local import_file=$1
   if [[ -f $import_file ]] && [[ "$(grep_prop debloat.import $import_file)" == 1 ]]; then
     c=1
-	for i in $(cat $import_file | grep -v debloat.import); do
+	for i in $(cat $import_file | grep -vE -e "(#|debloat.import)"); do
 	  name[c]=${i%^=*}
 	  sys_dir=${i#*^=}
       get_app_name $sys_dir $c
