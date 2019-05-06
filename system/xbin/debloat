@@ -226,6 +226,7 @@ menu_list_system_app() {
       debloat_app ${app_name[i]}
     fi
   done
+  unset proceed
   echo "Reboot to apply changes"
   echo -n "Return to menu? < y | n >: "
   read mchoice
