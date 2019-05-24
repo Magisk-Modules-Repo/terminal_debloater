@@ -65,6 +65,7 @@ import_file=$CACHELOC/import-debloat.txt
 exclude_file=$MODDIR/exclude.list
 LISTFILE=$CACHELOC/debloat.list
 RESCAN=true
+[ -d $SYSTEM2/build.prop ] && SYSTEM=$SYSTEM2
 
 [ $(getenforce) == "Permissive" ] && use_cmd=true || use_cmd=false
 [ $LOGNAME ] && use_cmd=true || use_cmd=false
