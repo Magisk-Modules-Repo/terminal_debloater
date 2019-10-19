@@ -20,6 +20,9 @@ or
 
 ## Changelog
 
+### v17.3.1
+* Preserve the debloated apps in vendor and product when updating
+* Add product apps in cli
 ### v17.3
 * Updated mod-util
 * Support Android 10's new directories
