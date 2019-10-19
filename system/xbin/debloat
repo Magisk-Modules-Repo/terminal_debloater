@@ -395,9 +395,11 @@ menu() {
   [ -d $SYSTEM/app ] && echo " 1 - ${W}System Apps${N}"
   [ -d $SYSTEM/priv-app ] && echo " 2 - ${W}System Priv-Apps${N}"
   [ -d $SYSTEM/vendor/app ] && echo " 3 - ${W}Vendor Apps${N}"
-  echo " 4 - ${W}Enter Custom System Apps dir${N}"
+  [ -d $SYSTEM/product/app ] && echo " 4 - ${W}System Product Apps${N}"
+  [ -d $SYSTEM/product/priv-app ] && echo " 5 - ${W}System Product Priv-Apps${N}"
+  echo " c - ${W}Enter Custom System Apps dir${N}"
   $show_rein && {
-    echo " 5 - ${W}Reinstall Uninstalled Apps${N}"
+    echo " r - ${W}Reinstall Uninstalled Apps${N}"
     echo " e - ${W}Export Config${N}"
   }
   echo " i - ${W}Import Config${N} ($import_file)"
@@ -422,8 +424,18 @@ menu() {
       else
         abort Invalid
       fi;;
-    4)  menu_list_custom_dir;;
-    5)  if $show_rein; then
+    4)  if [ -d $SYSTEM/product/app ]; then
+        menu_list_system_app product/app
+      else
+        abort Invalid
+      fi;;
+    5)  if [ -d $SYSTEM/product/priv-app ]; then
+        menu_list_system_app product/priv-app
+      else
+        abort Invalid
+      fi;;
+    c|C)  menu_list_custom_dir;;
+    r|R)  if $show_rein; then
         menu_list_unin_app
       else
         abort Invalid
