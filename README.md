@@ -20,6 +20,9 @@ or
 
 ## Changelog
 
+### v17.3
+* Updated mod-util
+* Support Android 10's new directories
 ### v17.2
 * Updated mod-util
 ### v17.1
