@@ -467,7 +467,11 @@ case "$1" in
       list_s-app priv-app 2>>$LOG
     elif [ "$1" == "vendor" ]; then
       list_s-app vendor/app 2>>$LOG
-    else
+    elif [ "$1" == "product/app" ]; then
+      list_s-app product/app 2>>$LOG
+    elif [ "$1" == "product/priv-app" ]; then
+      list_s-app product/priv-app 2>>$LOG
+     else
       abort "$(help_me)"
     fi
     c=1
