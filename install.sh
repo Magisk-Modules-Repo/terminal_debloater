@@ -146,6 +146,14 @@ on_install() {
     cp -rf $COPYPATH/system/priv-app $TMPDIR/debloater
     mitsuki=true
   fi
+  if [ -d "$COPYPATH/system/product/app" ] || [ -d "$COPYPATH/system/product/priv-app" ]; then
+    cp -rf $COPYPATH/system/product $TMPDIR/debloater
+    mitsuki=true
+  fi
+  if [ -d "$COPYPATH/system/vendor/app" ]; then
+    cp -rf $COPYPATH/system/vendor $TMPDIR/debloater
+    mitsuki=true
+  fi
 
   ui_print "- Extracting module files"
   unzip -o "$ZIPFILE" 'system/*' -d $MODPATH >&2
@@ -154,6 +162,8 @@ on_install() {
   if $mitsuki; then
     cp -rf $TMPDIR/debloater/app $MODPATH/system >/dev/null 2>&1
     cp -rf $TMPDIR/debloater/priv-app $MODPATH/system >/dev/null 2>&1
+    cp -rf $TMPDIR/debloater/product $MODPATH/system >/dev/null 2>&1
+    cp -rf $TMPDIR/debloater/vendor $MODPATH/system >/dev/null 2>&1
   fi
 }
 
