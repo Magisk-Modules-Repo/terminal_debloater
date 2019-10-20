@@ -204,7 +204,7 @@ menu_list_system_app() {
     c=$((c+1))
   done
   echo ""
-  $dir_error && echo " ${R}An error was detected while detecting system apps. BEWARE!${N}"
+  $dir_error && echo " ${R}An error was detected while detecting system apps.${N}"
   echo " ${Bl}To uninstall multiple apps, enter multiple numbers. Example:${N} \"1 ${#app_name[$((${#app_name[@]}/3))]} ${#app_name[$((${#app_name[@]}/2))]}\""
   echo " x - ${Bl}Back to Menu${N}"
   echo " r - ${Bl}Refresh list${N}"
