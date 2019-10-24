@@ -60,9 +60,9 @@ show_rein=false
 use_aapt=false
 export PATH=$MODDIR:$PATH
 [[ "$(which aapt)" ]] && use_aapt=true
-import_file=$CACHELOC/import-debloat.txt
+[ -d "$EXTERNAL_STORAGE" ] && import_file=$EXTERNAL_STORAGE/import-debloat.txt || import_file=$CACHELOC/import-debloat.txt
 exclude_file=$MODDIR/exclude.list
-LISTFILE=$CACHELOC/debloat.list
+LISTFILE=/data/local/tmp/debloat.list
 RESCAN=true
 [ -f $SYSTEM2/build.prop ] && SYSTEM=$SYSTEM2
 
