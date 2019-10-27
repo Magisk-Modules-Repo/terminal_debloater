@@ -234,10 +234,8 @@ menu_list_unin_app() {
   clear
   echo "$div"
   title_div "Reinstall"
-  echo " You can also just delete your selected
- folders in $MODDIR$SYSTEM2/app or priv-app."
-  echo " The apps debloated were reset
- to their factory version."
+  echo " You can also just delete your selected\n folders in $MODDIR$SYSTEM2/app or priv-app."
+  echo " The apps debloated were reset\n to their factory version."
   echo "$div"
   echo ""
   list_unin_app
