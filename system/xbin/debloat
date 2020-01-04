@@ -56,6 +56,7 @@ EOF
 exit
 }
 
+debloat_backup=/data/adb/debloat-backup.txt
 show_rein=false
 use_aapt=false
 export PATH=$MODDIR:$PATH
@@ -82,6 +83,7 @@ debloat_app() {
   }
   case "$proceed" in
     y|Y|a|A)  mktouch ${MODDIR}${DIR_APP}/.replace ${1}
+			 echo "${DIR_APP}" >> $debloat_backup
              $use_aapt && {
              if $(dumpsys package $PKG | grep UPDATED_SYSTEM_APP >/dev/null); then
                echo " - App is updated, uninstall updates in Settings App"
@@ -154,7 +156,7 @@ list_unin_app() {
     if [ $? -gt 0 ] || [ -z ${name_unin[c]} ] || [[ ! $(cat $i) ]]; then
       name_unin[c]=$(basename ${unin_app[c]})
     fi
-    echo " $c - ${W}${name_unin[c]}${N} ($(basename ${unin_app[c]%/*}))" | tr '_' ' ' | tr '%_' ' '
+    echo " $c - ${W}${name_unin[c]}${N}" | tr '_' ' ' | tr '%_' ' '
     c=$((c+1))
   done
 }
@@ -256,6 +258,7 @@ menu_list_unin_app() {
       echo "Reinstalling ${G}${name_unin[i]}${N}" | tr '_' ' ' | tr '%_' ' '
       sleep 0.4
       rm -rf ${unin_app[i]}
+	  sed -i "s#${unin_app[i]#*${MODDIR}}###g" $debloat_backup; sed -i '/^$/d' $debloat_backup
     fi
   done
   echo "Reboot to apply changes"
