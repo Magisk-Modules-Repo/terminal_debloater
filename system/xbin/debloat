@@ -60,8 +60,9 @@ debloat_backup=/data/adb/debloat-backup.txt
 show_rein=false
 use_aapt=false
 export PATH=$MODDIR:$PATH
+export SECONDARY_STORAGE=/storage/"$(ls /storage | grep -v '^self$' | grep -v '^emulated$')"
 [[ "$(which aapt)" ]] && use_aapt=true
-[ -d "$EXTERNAL_STORAGE" ] && import_file=$EXTERNAL_STORAGE/import-debloat.txt || import_file=$CACHELOC/import-debloat.txt
+[ -d "$EXTERNAL_STORAGE" ] && import_file=$EXTERNAL_STORAGE/import-debloat.txt || import_file=$CACHELOC/import-debloat.txt || [ -d "$SECONDARY_STORAGE" ] && import_file=$SECONDARY_STORAGE/import-debloat.txt
 exclude_file=$MODDIR/exclude.list
 LISTFILE=/data/local/tmp/debloat.list
 RESCAN=true
