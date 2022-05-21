@@ -398,7 +398,7 @@ menu() {
   [ -d $SYSTEM/vendor/app ] && echo " 3 - ${W}Vendor Apps${N}"
   [ -d $SYSTEM/product/app ] && echo " 4 - ${W}System Product Apps${N}"
   [ -d $SYSTEM/product/priv-app ] && echo " 5 - ${W}System Product Priv-Apps${N}"
-  [ -d $SYSTEM/system_extt/app ] && echo " 6 - ${W}System System_ext Apps${N}"
+  [ -d $SYSTEM/system_ext/app ] && echo " 6 - ${W}System System_ext Apps${N}"
   [ -d $SYSTEM/system_ext/priv-app ] && echo " 7 - ${W}System System_ext Priv-Apps${N}"
   echo " c - ${W}Enter Custom System Apps dir${N}"
   $show_rein && {
