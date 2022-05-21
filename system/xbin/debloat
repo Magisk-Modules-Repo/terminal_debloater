@@ -398,6 +398,8 @@ menu() {
   [ -d $SYSTEM/vendor/app ] && echo " 3 - ${W}Vendor Apps${N}"
   [ -d $SYSTEM/product/app ] && echo " 4 - ${W}System Product Apps${N}"
   [ -d $SYSTEM/product/priv-app ] && echo " 5 - ${W}System Product Priv-Apps${N}"
+  [ -d $SYSTEM/system_extt/app ] && echo " 6 - ${W}System System_ext Apps${N}"
+  [ -d $SYSTEM/system_ext/priv-app ] && echo " 7 - ${W}System System_ext Priv-Apps${N}"
   echo " c - ${W}Enter Custom System Apps dir${N}"
   $show_rein && {
     echo " r - ${W}Reinstall Uninstalled Apps${N}"
@@ -432,6 +434,16 @@ menu() {
       fi;;
     5)  if [ -d $SYSTEM/product/priv-app ]; then
         menu_list_system_app product/priv-app
+      else
+        abort Invalid
+      fi;;
+      6)  if [ -d $SYSTEM/system_ext/app ]; then
+        menu_list_system_app system_ext/app
+      else
+        abort Invalid
+      fi;;
+      7)  if [ -d $SYSTEM/system_ext/priv-app ]; then
+        menu_list_system_app system_ext/priv-app
       else
         abort Invalid
       fi;;
